@@ -1041,7 +1041,7 @@ main{
 
   <div class="card">
     <div class="customer-toolbar">
-      <input id="deliveryCustomerSearch" placeholder="Search customer name, phone or address...">
+      <input id="mainCustomerSearch" placeholder="Search customer name, phone or address...">
       <select id="customerAreaFilter"><option value="">All Areas</option><option>North</option><option>Central</option><option>South</option></select>
       <select id="customerTypeFilter"><option value="">All Types</option><option value="residential">Residential</option><option value="establishment">Establishment</option><option value="outlet">Outlet</option></select>
       <div id="customerCount" class="muted" style="text-align:right">0 customers</div>
@@ -1754,7 +1754,7 @@ async function loadCustomerModule(){
 }
 
 function renderCustomerRows(){
-  const q=($('customerSearch').value||'').trim().toLowerCase();
+  const q=($('mainCustomerSearch').value||'').trim().toLowerCase();
   const area=$('customerAreaFilter').value,type=$('customerTypeFilter').value;
   const rows=customers.filter(c=>{
     if(area&&c.area!==area)return false;
@@ -1808,7 +1808,7 @@ function closeCustomerProfile(){$('customerProfileModal').classList.add('hidden'
 $('newCustomerMain').onclick=openNewCustomerForm;
 $('cancelCustomerForm').onclick=closeNewCustomerForm;
 $('saveMainCustomer').onclick=saveMainCustomer;
-$('customerSearch').oninput=renderCustomerRows;
+$('mainCustomerSearch').oninput=renderCustomerRows;
 $('customerAreaFilter').onchange=renderCustomerRows;
 $('customerTypeFilter').onchange=renderCustomerRows;
 $('customerProfileModal').addEventListener('click',e=>{if(e.target.id==='customerProfileModal')closeCustomerProfile()});
