@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Solavida POS — V46 PO / Credit</title>
+<title>Solavida POS — V84 Walk-In Product Cards</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--bg:#f5f8f7;--card:#fff;--text:#18322d;--muted:#71807c;--line:#dce7e3;--primary:#087f69;--soft:#e8f3f0}
@@ -33,10 +33,18 @@ input,select{width:100%;padding:11px;border:1px solid var(--line);border-radius:
 .product-catalog-panel,.walkin-receipt-panel{border:1px solid #dce8e4;border-radius:15px;background:linear-gradient(145deg,#fff,#f8fbfa);box-shadow:0 5px 14px rgba(20,50,45,.06);padding:18px}
 .panel-heading,.receipt-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px}
 .panel-heading h3,.receipt-head h3{margin:0 0 3px;font-size:16px}
-.product-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.product-row{display:grid;grid-template-columns:minmax(0,1fr) 128px;gap:14px;align-items:center;border:1px solid #dce8e4;border-radius:12px;padding:12px 14px;background:#fff;box-shadow:0 3px 9px rgba(20,50,45,.045)}
-.product-info strong{display:block;font-size:13px;color:#173f3b}.product-info span{display:block;color:#65736f;font-size:11px;margin-top:3px}
-.qty-control{display:grid;grid-template-columns:30px 56px 30px;align-items:center;justify-content:end;gap:5px}.qty-control button{width:30px;height:34px;padding:0;border-radius:8px;border:1px solid #d4e1dd;background:#f5f9f8;color:#124f49;font-weight:900;font-size:14px;line-height:1}.qty-control input{width:56px;height:34px;box-sizing:border-box;text-align:center;border:1px solid #cbdcd7;border-radius:8px;background:#fff;font-weight:700;font-size:14px;color:#123f3a;padding:4px 6px}.qty-control input:focus{outline:2px solid rgba(18,79,73,.16);border-color:#78aaa0}
+.product-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.product-row{display:grid;grid-template-columns:92px minmax(0,1fr);gap:13px;align-items:stretch;border:1px solid #d7e6ec;border-radius:15px;padding:12px;background:linear-gradient(145deg,#fff,#fbfdfe);box-shadow:0 4px 12px rgba(24,72,92,.055);min-height:154px}
+.product-visual{width:92px;min-height:126px;border-radius:11px;background:linear-gradient(180deg,#f1f9fd,#e4f3fa);display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid #e0eff6}
+.product-visual svg{width:84px;height:112px;display:block}
+.product-info{min-width:0;display:flex;flex-direction:column;gap:6px;align-items:stretch}
+.product-info strong{display:block;font-size:14px;line-height:1.25;color:#163f59}.product-info .product-unit-price{display:block;color:#607d8b;font-size:11px;margin-top:-2px}
+.walkin-controls{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:end;margin-top:2px}
+.walkin-type-wrap{display:flex;flex-direction:column;gap:3px;min-width:0;color:#587384;font-size:10px;font-weight:800}.walkin-type-select{width:100%;height:32px;margin:0;padding:4px 7px;border:1px solid #ccdee8;border-radius:8px;background:#fff;color:#174d6a;font-size:12px;font-weight:700;min-width:0}
+.walkin-qty-wrap{display:flex;flex-direction:column;gap:3px;color:#587384;font-size:10px;font-weight:800}.qty-control{display:grid;grid-template-columns:27px 48px 27px;align-items:center;gap:4px}.qty-control button{width:27px;height:32px;padding:0;border-radius:8px;border:1px solid #ccdee8;background:#f2f8fb;color:#145b7a;font-weight:900;font-size:14px;line-height:1}.qty-control input{width:48px;height:32px;box-sizing:border-box;text-align:center;border:1px solid #ccdee8;border-radius:8px;background:#fff;font-weight:700;font-size:14px;color:#173f59;padding:4px 3px;margin:0}.qty-control input:focus{outline:2px solid rgba(8,120,185,.15);border-color:#82b7d0}
+.walkin-total{display:flex;justify-content:space-between;align-items:center;border-top:1px solid #e2edf2;padding-top:6px;margin-top:auto;color:#526f7f;font-size:11px;font-weight:800}.walkin-total strong{font-size:17px;color:#0878b9;font-weight:800}
+@media(max-width:1120px){.product-list{grid-template-columns:1fr}}
+@media(max-width:480px){.product-row{grid-template-columns:74px minmax(0,1fr);gap:9px;padding:9px}.product-visual{width:74px;min-height:112px}.product-visual svg{width:70px;height:98px}.product-info strong{font-size:13px}.walkin-controls{grid-template-columns:minmax(0,1fr)}.walkin-qty-wrap{align-items:flex-start}.walkin-total strong{font-size:16px}}
 .cart-items{min-height:135px;max-height:245px;overflow:auto;border-top:1px solid #e0e9e6;border-bottom:1px solid #e0e9e6}.empty-cart{padding:28px 10px;text-align:center;color:#7a8884;font-size:12px}
 .cart-line{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:10px 2px;border-bottom:1px dashed #dce6e3}.cart-line:last-child{border-bottom:0}.cart-line strong{display:block;font-size:12px}.cart-line small{color:#71807c}.cart-line-total{text-align:right;font-weight:800}
 .receipt-total{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid #dfe9e6}.receipt-total span{font-size:14px;font-weight:800}.receipt-total strong{font-size:24px;color:#124f49}
@@ -641,7 +649,7 @@ main{
 #deliveryPersonnelRows select{width:100%;box-sizing:border-box;padding:9px;border:1px solid #cfe0e9;border-radius:9px;background:#fff}
 </style>
 <style id="eod-style">
-.eod-screen{padding:0 0 30px}.eod-head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;margin-bottom:16px}.eod-head h1{margin:0 0 3px;font-size:25px;color:#143a62}.eod-date-tools{display:flex;gap:8px;align-items:center}.eod-date-tools input{height:40px;padding:0 12px;border:1px solid #d3e1e8;border-radius:10px;background:#fff;color:#254b63}.eod-date-tools .primary{height:40px;padding:0 16px}.eod-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}.eod-kpi{background:linear-gradient(135deg,#fff,#f4fbfe);border-radius:15px;padding:15px 16px;box-shadow:0 7px 18px rgba(30,84,112,.08);border:1px solid #e3eef3}.eod-kpi span{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:#688091;font-weight:800}.eod-kpi strong{display:block;margin-top:6px;font-size:21px;color:#174c88}.eod-main-grid{display:grid;grid-template-columns:430px 1fr;gap:14px;align-items:start}.eod-left{display:grid;gap:14px}.eod-card{background:#fff;border-radius:17px;box-shadow:0 8px 24px rgba(30,84,112,.08);border:1px solid #e3eef3;padding:18px}.eod-card-title{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:12px}.eod-card-title h2{margin:0 0 4px;color:#123b60;font-size:16px}.eod-card-title .muted{font-size:10px}.eod-icon{width:34px;height:34px;border-radius:12px;background:#edf8fc;color:#0879ba;display:grid;place-items:center;font-weight:900}.eod-money-list>div{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid #e8eef1;font-size:11px;color:#31566b}.eod-money-list strong{color:#163f68}.eod-money-list .eod-total-line{border-bottom:0;padding-top:14px;font-size:13px;font-weight:800}.eod-money-list .eod-total-line strong{font-size:17px;color:#0879ba}.eod-recon-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}.eod-recon-grid>div{border:1px solid #dbe8ee;border-radius:11px;padding:11px;background:#f7fbfd}.eod-recon-grid span{display:block;font-size:8px;color:#637c8b;font-weight:900}.eod-recon-grid strong{display:block;margin-top:8px;font-size:17px;color:#21477a}.eod-recon-grid small{display:block;margin-top:4px;font-size:8px;color:#78909d}.actual-cash-box input{width:100%;box-sizing:border-box;margin-top:8px;border:0;background:#fff;padding:10px;border-radius:9px;font-size:16px;font-weight:800;color:#21477a;outline:1px solid #dce9ef}.eod-notes-label{display:block;font-size:10px;font-weight:800;color:#45677b;margin:15px 0 6px}.eod-card textarea{width:100%;box-sizing:border-box;border:1px solid #dce8ee;border-radius:10px;padding:10px;resize:vertical;font-family:inherit}.eod-close-btn{width:100%;margin-top:14px;border:0;border-radius:10px;padding:11px;background:#21396f;color:#fff;font-weight:900;cursor:pointer;box-shadow:0 5px 12px rgba(32,57,111,.18)}.eod-table-wrap{overflow:auto;border:1px solid #e2edf2;border-radius:12px}.eod-table{width:100%;border-collapse:collapse;min-width:720px}.eod-table th{background:#edf7fb;color:#547184;font-size:8px;text-transform:uppercase;letter-spacing:.35px;text-align:left;padding:10px 9px}.eod-table td{padding:9px;border-top:1px solid #e7eef2;font-size:9px;color:#35566a;white-space:nowrap}.eod-table td strong{color:#164875}.eod-table .eod-empty{text-align:center;padding:30px;color:#78909d}.eod-status{font-weight:900;font-size:8px}.eod-status.paid{color:#167a61}.eod-status.credit{color:#a05a14}.eod-history-title{font-size:14px;font-weight:900;color:#143d61;margin:18px 0 3px}.eod-history-sub{font-size:9px;margin-bottom:8px}.eod-msg-ok{margin-top:8px;background:#e9f8f1;color:#166c52;padding:8px 10px;border-radius:8px;font-size:10px}.eod-msg-err{margin-top:8px;background:#fff0f0;color:#a33e3e;padding:8px 10px;border-radius:8px;font-size:10px}@media(max-width:1100px){.eod-main-grid{grid-template-columns:1fr}.eod-kpis{grid-template-columns:repeat(2,1fr)}}@media(max-width:650px){.eod-head{align-items:stretch;flex-direction:column}.eod-date-tools{width:100%}.eod-date-tools input{flex:1}.eod-kpis{grid-template-columns:1fr}.eod-recon-grid{grid-template-columns:1fr}}
+.eod-screen{padding:0 0 30px}.eod-head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;margin-bottom:16px}.eod-head h1{margin:0 0 3px;font-size:25px;color:#143a62}.eod-date-tools{display:flex;gap:8px;align-items:center}.eod-date-tools input{height:40px;padding:0 12px;border:1px solid #d3e1e8;border-radius:10px;background:#fff;color:#254b63}.eod-date-tools .primary{height:40px;padding:0 16px}.eod-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}.eod-kpi{background:linear-gradient(135deg,#fff,#f4fbfe);border-radius:15px;padding:15px 16px;box-shadow:0 7px 18px rgba(30,84,112,.08);border:1px solid #e3eef3}.eod-kpi span{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:#688091;font-weight:800}.eod-kpi strong{display:block;margin-top:6px;font-size:21px;color:#174c88}.eod-main-grid{display:grid;grid-template-columns:430px 1fr;gap:14px;align-items:start}.eod-left{display:grid;gap:14px}.eod-card{background:#fff;border-radius:17px;box-shadow:0 8px 24px rgba(30,84,112,.08);border:1px solid #e3eef3;padding:18px}.eod-card-title{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:12px}.eod-card-title h2{margin:0 0 4px;color:#123b60;font-size:16px}.eod-card-title .muted{font-size:10px}.eod-icon{width:34px;height:34px;border-radius:12px;background:#edf8fc;color:#0879ba;display:grid;place-items:center;font-weight:900}.eod-money-list>div{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid #e8eef1;font-size:11px;color:#31566b}.eod-money-list strong{color:#163f68}.eod-money-list .eod-total-line{border-bottom:0;padding-top:14px;font-size:13px;font-weight:800}.eod-money-list .eod-total-line strong{font-size:17px;color:#0879ba}.eod-recon-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}.eod-recon-grid>div{border:1px solid #dbe8ee;border-radius:11px;padding:11px;background:#f7fbfd}.eod-recon-grid span{display:block;font-size:8px;color:#637c8b;font-weight:900}.eod-recon-grid strong{display:block;margin-top:8px;font-size:17px;color:#21477a}.eod-recon-grid small{display:block;margin-top:4px;font-size:8px;color:#78909d}.actual-cash-box input{width:100%;box-sizing:border-box;margin-top:8px;border:0;background:#fff;padding:10px;border-radius:9px;font-size:16px;font-weight:800;color:#21477a;outline:1px solid #dce9ef}.eod-notes-label{display:block;font-size:10px;font-weight:800;color:#45677b;margin:15px 0 6px}.eod-card textarea{width:100%;box-sizing:border-box;border:1px solid #dce8ee;border-radius:10px;padding:10px;resize:vertical;font-family:inherit}.eod-close-btn{width:100%;margin-top:14px;border:0;border-radius:10px;padding:11px;background:#21396f;color:#fff;font-weight:900;cursor:pointer;box-shadow:0 5px 12px rgba(32,57,111,.18)}.eod-table-wrap{overflow:auto;border:1px solid #e2edf2;border-radius:12px}.eod-table{width:100%;border-collapse:collapse;min-width:720px}.eod-table th{background:#edf7fb;color:#547184;font-size:8px;text-transform:uppercase;letter-spacing:.35px;text-align:left;padding:10px 9px}.eod-table td{padding:9px;border-top:1px solid #e7eef2;font-size:13px;color:#35566a;white-space:nowrap}.eod-table td:first-child{font-size:12px;font-weight:400}.eod-table td:first-child strong{font-weight:400;color:#164875}.eod-table td:nth-child(2){font-size:14px;font-weight:700;color:#143d61}.eod-table td:nth-child(5){font-size:13px}.eod-table .eod-empty{text-align:center;padding:30px;color:#78909d}.eod-status{font-weight:800;font-size:13px}.eod-status.paid{color:#167a61}.eod-status.credit{color:#a05a14}.eod-history-title{font-size:14px;font-weight:900;color:#143d61;margin:18px 0 3px}.eod-history-sub{font-size:9px;margin-bottom:8px}.eod-msg-ok{margin-top:8px;background:#e9f8f1;color:#166c52;padding:8px 10px;border-radius:8px;font-size:10px}.eod-msg-err{margin-top:8px;background:#fff0f0;color:#a33e3e;padding:8px 10px;border-radius:8px;font-size:10px}@media(max-width:1100px){.eod-main-grid{grid-template-columns:1fr}.eod-kpis{grid-template-columns:repeat(2,1fr)}}@media(max-width:650px){.eod-head{align-items:stretch;flex-direction:column}.eod-date-tools{width:100%}.eod-date-tools input{flex:1}.eod-kpis{grid-template-columns:1fr}.eod-recon-grid{grid-template-columns:1fr}}
 </style>
 
 <style id="owner-settings-tabs-css">
@@ -717,6 +725,89 @@ main{
 }
 </style>
 
+
+<style id="customer-duplicate-check-css">
+.customer-dup-overlay{position:fixed;inset:0;background:rgba(12,42,68,.45);backdrop-filter:blur(2px);display:flex;align-items:center;justify-content:center;z-index:99999;padding:20px}
+.customer-dup-modal{width:min(620px,100%);background:#fff;border-radius:24px;box-shadow:0 22px 70px rgba(16,52,84,.28);padding:30px 32px 28px;color:#173b5d}
+.customer-dup-icon{width:60px;height:60px;border-radius:18px;background:#fff0c9;display:grid;place-items:center;font-size:30px;margin-bottom:14px}
+.customer-dup-kicker{font-size:12px;font-weight:900;letter-spacing:.7px;color:#0879ba;margin-bottom:8px}
+.customer-dup-modal h3{font-size:26px;line-height:1.15;margin:0 0 12px;color:#173b5d}
+.customer-dup-modal p{font-size:13px;line-height:1.55;color:#62798a;margin:0 0 14px}
+.customer-dup-match{background:#fff8df;border:1px solid #f0df9b;border-radius:14px;padding:12px 14px;color:#765d16;font-size:12px;line-height:1.5;margin:14px 0 18px}
+.customer-dup-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.customer-dup-actions button{border:0;border-radius:12px;padding:14px 16px;font:800 13px Poppins,Arial,sans-serif;cursor:pointer}
+.customer-dup-no{background:#e8eff4;color:#2c4d63}
+.customer-dup-yes{background:#087fc3;color:#fff;box-shadow:0 5px 12px rgba(8,127,195,.2)}
+@media(max-width:650px){.customer-dup-modal{padding:24px}.customer-dup-actions{grid-template-columns:1fr}.customer-dup-modal h3{font-size:22px}}
+.new-customer-duplicate-hint{margin-top:8px;padding:10px 12px;border:1px solid #f0df9b;border-radius:10px;background:#fff8df;color:#765d16;font-size:11px;line-height:1.45}.new-customer-duplicate-hint .dup-hint-actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}.new-customer-duplicate-hint button{border:0;border-radius:7px;padding:7px 9px;font-size:10px;font-weight:800;cursor:pointer}.new-customer-duplicate-hint .dup-use{background:#087fc3;color:#fff}.new-customer-duplicate-hint .dup-different{background:#e8eff4;color:#2c4d63}
+</style>
+
+<style id="solavida-v75-orders-fonts-and-multi-delivery">
+/* Compact delivery products: product, quantity, unit price and line total on one row. */
+.delivery-items-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:8px 0}.delivery-items-head strong{font-size:13px;color:#173e5a}.delivery-multi-note{font-size:10px;line-height:1.4;margin:0 0 8px}.delivery-item-row{border:1px solid #d9e8ef;background:#fbfdfe;border-radius:10px;padding:10px;margin:8px 0}.delivery-item-top{display:none}.delivery-remove{border:1px solid #f0cccc;background:#fff4f4;color:#a33b3b;border-radius:8px;width:28px;height:36px;font-size:18px;font-weight:800;align-self:end}.delivery-item-fields{display:grid;grid-template-columns:minmax(220px,2.3fr) minmax(72px,.65fr) minmax(125px,1fr) minmax(95px,.8fr) 28px;gap:10px;align-items:end;margin-top:0}.delivery-item-fields.has-container{grid-template-columns:minmax(160px,1.7fr) minmax(100px,.9fr) minmax(62px,.55fr) minmax(120px,1fr) minmax(88px,.8fr) 28px}.delivery-item-fields label{display:block;margin:0 0 5px;font-size:10px;font-weight:800;color:#718793;white-space:nowrap}.delivery-item-fields input{width:100%;min-width:0;box-sizing:border-box;border:1px solid #cfe0e9;border-radius:8px;padding:9px 10px;background:#fff;height:38px}.delivery-item-fields .delivery-item-product{font-size:12px}.delivery-item-fields .locked-price{min-height:38px;height:38px;box-sizing:border-box;font-size:12px;padding:8px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.delivery-item-line-total strong{display:flex;align-items:center;min-height:38px;color:#0878b9;font-size:14px;white-space:nowrap}.summary-line{font-size:13px}.summary-line small{font-size:12px}.summary-line>strong{font-size:15px}
+@media(max-width:760px){.delivery-item-fields{grid-template-columns:minmax(150px,2fr) 70px minmax(100px,1fr) minmax(80px,.8fr) 28px;gap:6px}.delivery-item-fields.has-container{grid-template-columns:minmax(130px,1.5fr) minmax(85px,.85fr) 60px minmax(100px,1fr) minmax(78px,.8fr) 28px}.delivery-item-row{padding:8px}}
+@media(max-width:700px){.delivery-item-fields,.delivery-item-fields.has-container{grid-template-columns:minmax(0,1fr) 82px;gap:8px}.delivery-field-product{grid-column:1/-1}.delivery-field-container-type{grid-column:1/-1}.delivery-item-price-wrap{grid-column:1/2}.delivery-item-line-total{grid-column:2/3;min-width:0}.delivery-item-fields .delivery-remove{grid-column:2/3;justify-self:end}.delivery-item-line-total strong{min-height:34px}.delivery-item-fields .locked-price{height:34px;min-height:34px}.delivery-item-fields input{height:34px}}
+
+/* Make Orders typography easier to read, with order codes secondary and customer names prominent. */
+.orders-list-head strong{font-size:16px}.orders-list-head .muted{font-size:12px}.order-number{font-size:12px;font-weight:500;letter-spacing:.01em}.order-customer{font-size:16px;font-weight:800;margin-top:4px}.order-row-meta{font-size:12px;gap:11px;margin-top:8px}.order-row-total{font-size:16px;font-weight:800}.status-chip{font-size:10px;padding:5px 8px}.detail-order-no{font-size:12px;font-weight:500;letter-spacing:.02em}.detail-head h3{font-size:24px!important}.detail-sub{font-size:13px}.detail-info span{font-size:10px}.detail-info strong{font-size:14px}.detail-section-title{font-size:13px;margin-top:20px}.detail-item{font-size:13px;padding:11px 0}.detail-item strong{font-size:14px}.detail-total{font-size:15px}.action-primary,.action-secondary,.action-danger{font-size:12px}.complete-grid label{font-size:12px}.complete-grid input,.complete-grid select{font-size:14px}
+@media(max-width:700px){.delivery-item-fields{grid-template-columns:1fr 1fr}.delivery-item-line-total{grid-column:1/-1}}
+</style>
+
+
+<style id="solavida-v77-customer-fonts-and-delivery-alignment">
+/* Customer list and profile: improve readability without changing the layout or behavior. */
+.customer-toolbar input,.customer-toolbar select{font-size:14px!important}
+.customer-toolbar .muted,.customer-toolbar span{font-size:13px}
+.customer-table th{font-size:11px;padding:12px 13px}
+.customer-table td{font-size:14px;padding:12px 13px;line-height:1.35}
+.customer-name-cell strong{font-size:15px}
+.customer-name-cell small{font-size:12px;color:#718a98}
+.customer-view-btn{font-size:12px;padding:8px 12px}
+.customer-empty{font-size:14px}
+.customer-profile-panel{font-size:14px}
+.customer-profile-head h2{font-size:25px}
+.customer-profile-head .profile-sub{font-size:13px;line-height:1.45}
+.profile-stat span{font-size:10px}
+.profile-stat strong{font-size:15px}
+.profile-section h4{font-size:13px}
+.profile-info span{font-size:11px}
+.profile-info strong{font-size:13px;line-height:1.4}
+.profile-price-row{font-size:13px;gap:12px;line-height:1.4}
+.profile-order-row{font-size:12px}
+.profile-notes{font-size:13px}
+.profile-map{font-size:13px}
+/* Delivery rows: align remove button with the product input, not below the row. */
+.delivery-item-fields{align-items:start}
+.delivery-item-fields .delivery-remove{align-self:start;margin-top:25px;height:38px;width:28px;display:flex;align-items:center;justify-content:center;line-height:1;padding:0}
+@media(max-width:760px){
+  .customer-table th{font-size:10px}
+  .customer-table td{font-size:13px}
+  .customer-name-cell strong{font-size:14px}
+  .customer-name-cell small{font-size:11px}
+  .delivery-item-fields .delivery-remove{margin-top:30px}
+}
+@media(max-width:560px){
+  .delivery-item-fields{align-items:start}
+  .delivery-item-fields .delivery-remove{margin-top:27px;height:34px}
+}
+</style>
+
+<style id="solavida-v80-container-types">
+.delivery-item-fields{grid-template-columns:minmax(180px,1.9fr) minmax(105px,.9fr) minmax(64px,.55fr) minmax(120px,1fr) minmax(90px,.75fr) 28px!important;gap:9px!important;align-items:start!important}
+.delivery-field-container-type select{width:100%;min-width:0;box-sizing:border-box;border:1px solid #cfe0e9;border-radius:8px;padding:9px 8px;background:#fff;color:#15384f;height:38px;font-size:12px}
+.delivery-item-fields .delivery-remove{align-self:start!important;margin-top:25px!important;height:38px!important;width:28px!important;display:flex!important;align-items:center!important;justify-content:center!important;line-height:1!important;padding:0!important}
+@media(max-width:760px){.delivery-item-fields{grid-template-columns:minmax(130px,1.5fr) minmax(90px,.9fr) 64px minmax(105px,1fr) minmax(80px,.75fr) 28px!important;gap:6px!important}.delivery-field-container-type select{font-size:11px;padding:8px 5px}}
+@media(max-width:700px){.delivery-item-fields{grid-template-columns:minmax(0,1fr) minmax(100px,.7fr)!important}.delivery-field-product{grid-column:1/-1}.delivery-field-container-type{grid-column:1/2}.delivery-item-price-wrap{grid-column:1/2}.delivery-item-line-total{grid-column:2/3!important;grid-row:auto}.delivery-item-fields .delivery-remove{grid-column:2/3;grid-row:2;justify-self:end;margin-top:25px!important}}
+</style>
+
+<meta name="solavida-pos-version" content="V81 Customer Save and Delivery Row Fixes">
+
+<style id="solavida-v82-duplicate-order-guard">
+#createDelivery:disabled{opacity:.72;cursor:wait;filter:saturate(.7)}
+#createDelivery.is-saving{position:relative;padding-left:42px}
+#createDelivery.is-saving:before{content:"";position:absolute;left:18px;top:50%;width:13px;height:13px;margin-top:-7px;border:2px solid rgba(255,255,255,.45);border-top-color:#fff;border-radius:50%;animation:solavidaOrderSaving .75s linear infinite}
+@keyframes solavidaOrderSaving{to{transform:rotate(360deg)}}
+</style>
 </head>
 <body>
 
@@ -944,7 +1035,7 @@ main{
           <select id="customer" class="hidden"><option value="">Search / select customer...</option></select>
           <div id="customerInfo" class="customer-summary hidden"><div class="customer-main"><div class="customer-avatar">👤</div><div><strong id="cName"></strong><div id="cPhone" class="muted"></div></div></div><div class="customer-details"><div><span>Area</span><strong id="cArea"></strong></div><div><span>Address</span><strong id="cAddress"></strong></div></div><a id="cMap" class="map-link hidden" target="_blank" rel="noopener">📍 Open saved location in Google Maps</a></div>
           <div id="customerForm" class="customer-form hidden"><div class="form-title">New Customer</div><div class="form-grid two">
-            <div><label>Customer Name</label><input id="newName"></div><div><label>Phone Number</label><input id="newPhone" type="tel"></div>
+            <div><label>Customer Name</label><input id="newName" autocomplete="off"><div id="newCustomerDuplicateHint" class="new-customer-duplicate-hint hidden" aria-live="polite"></div></div><div><label>Phone Number</label><input id="newPhone" type="tel"></div>
             <div><label>Customer Type</label><select id="newType"><option value="residential">Residential</option><option value="establishment">Establishment</option><option value="outlet">Outlet</option></select></div>
             <div><label>Area</label><select id="newArea"><option>North</option><option>Central</option><option>South</option></select></div>
             <div class="full"><label>Address</label><input id="newAddress"></div><div class="full"><label>Google Maps Link</label><input id="newMap" type="text" placeholder="Paste Google Maps → Share → Copy link"><div class="muted" style="margin-top:4px;font-size:9px">You can paste a Google Maps link or a Plus Code/location text. The POS will convert it to a clickable map link.</div></div>
@@ -954,15 +1045,16 @@ main{
         </div>
         <div class="delivery-panel">
           <div class="panel-heading"><div><h3>2. Delivery Product</h3><div class="price-note">Delivery is container/day based. Liter products are Walk-In only.</div></div></div>
-          <label>Product</label><select id="deliveryProduct"><option value="">Select delivery product...</option></select>
-          <div class="delivery-product-info"><div><span>Quantity</span><input id="deliveryQty" type="number" min="0.01" step="1" value="1"></div><div><span>Selling Price</span><div class="locked-price" id="deliveryPriceDisplay">₱0.00 / container</div><input id="deliveryPrice" type="hidden"><small>Configured price — staff cannot change this here.</small></div></div>
+          <div class="delivery-items-head"><strong>Products in this delivery</strong><button type="button" class="secondary" id="addDeliveryProduct">＋ Add Another Product</button></div>
+          <div class="muted delivery-multi-note">Add one or more products to the same customer order. Water is sold by container for delivery; dispenser lending is charged per day.</div>
+          <div id="deliveryItems"></div>
           <label>Delivery Notes</label><textarea id="deliveryNotes" rows="3" placeholder="Special instructions, gate details, contact person, etc."></textarea>
         </div>
       </div>
       <div class="delivery-right">
         <div class="delivery-panel delivery-receipt"><div class="receipt-head"><div><h3>Order Summary</h3><div class="price-note">Review before creating the pending order.</div></div><span class="summary-status">PENDING</span></div>
           <div class="summary-customer"><span>Customer</span><strong id="summaryCustomer">Select a customer</strong></div>
-          <div class="summary-line"><div><strong id="summaryProduct">No product selected</strong><small id="summaryQty">—</small></div><strong id="summaryLineTotal">₱0.00</strong></div>
+          <div id="summaryDeliveryItems"><div class="summary-line"><div><strong id="summaryProduct">No product selected</strong><small id="summaryQty">—</small></div><strong id="summaryLineTotal">₱0.00</strong></div></div>
           <div class="summary-location"><span>📍 Delivery to</span><strong id="summaryAddress">Select a customer to see the address.</strong><a id="summaryMap" class="hidden" target="_blank" rel="noopener">Open Map</a></div>
           <div class="summary-total"><span>Order Total</span><strong id="deliveryTotal">₱0.00</strong></div>
           <div class="delivery-flow"><div class="flow-step active"><b>1</b><span>Pending</span></div><div class="flow-line"></div><div class="flow-step"><b>2</b><span>On the Way</span></div><div class="flow-line"></div><div class="flow-step"><b>3</b><span>Delivered</span></div></div>
@@ -1041,7 +1133,7 @@ main{
 
   <div class="card">
     <div class="customer-toolbar">
-      <input id="mainCustomerSearch" placeholder="Search customer name, phone or address...">
+      <input id="customerSearch" placeholder="Search customer name, phone or address...">
       <select id="customerAreaFilter"><option value="">All Areas</option><option>North</option><option>Central</option><option>South</option></select>
       <select id="customerTypeFilter"><option value="">All Types</option><option value="residential">Residential</option><option value="establishment">Establishment</option><option value="outlet">Outlet</option></select>
       <div id="customerCount" class="muted" style="text-align:right">0 customers</div>
@@ -1106,7 +1198,7 @@ main{
 
 <section id="eod" class="hidden eod-screen">
   <div class="eod-head">
-    <div><h1>End of Day Closing</h1><div class="muted">Reconcile today's sales, collections and physical cash before closing.</div></div>
+    <div><h1>End of Day Closing</h1><div class="muted">Reconcile the selected business date's sales, collections and physical cash before closing.</div></div>
     <div class="eod-date-tools"><input id="eodDate" type="date"><button id="eodRefresh" class="primary">↻ Refresh</button></div>
   </div>
   <div class="eod-kpis">
@@ -1145,7 +1237,7 @@ main{
       </div>
     </div>
     <div class="eod-card eod-transactions-card">
-      <div class="eod-card-title"><div><h2>📋 Today's Transactions</h2><div class="muted">All completed sales recorded for the selected business date</div></div></div>
+      <div class="eod-card-title"><div><h2>📋 Today's Transactions</h2><div class="muted">All completed sales recorded for the selected business date • TC = actual containers delivered</div></div></div>
       <div class="eod-table-wrap"><table class="eod-table"><thead><tr><th>Order</th><th>Customer</th><th>Total</th><th>Paid</th><th>Method</th><th>Status</th><th>Attended By</th></tr></thead><tbody id="eodTransactionsBody"><tr><td colspan="7" class="eod-empty">No completed sales for this date.</td></tr></tbody></table></div>
       <div class="eod-history-title">📁 Closing History</div>
       <div class="muted eod-history-sub">Daily closing records already saved</div>
@@ -1168,6 +1260,7 @@ main{
 
     <div class="os-settings-tabs" role="tablist">
       <button class="os-settings-tab active" data-settings-tab="products" onclick="showSettingsTab('products')">💧 Products</button>
+      <button class="os-settings-tab" data-settings-tab="container-types" onclick="showSettingsTab('container-types')">🫙 Container Types</button>
       <button class="os-settings-tab" data-settings-tab="personnel" onclick="showSettingsTab('personnel')">👥 Personnel</button>
       <button class="os-settings-tab" data-settings-tab="inventory" onclick="showSettingsTab('inventory')">📦 Inventory</button>
       <button class="os-settings-tab" data-settings-tab="settings-core" onclick="showSettingsTab('settings-core')">⚙ Settings</button>
@@ -1189,6 +1282,21 @@ main{
             </div>
           </div>
           <div class="os-note">Changing a default price affects future transactions. Existing completed sales keep their recorded price.</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="settingsPanel-container-types" class="os-settings-panel hidden">
+      <div class="os-card">
+        <div class="os-card-head"><div><h2>🫙 Container Types</h2><p>Add container shapes or sizes and set a price adjustment for each. Round and Slim start at the same price.</p></div></div>
+        <div class="os-body">
+          <div class="os-note">Price adjustment is added to the customer's normal product price. Keep both at ₱0.00 to charge the same price. For example, Slim can have a ₱5.00 adjustment later without changing the Round price.</div>
+          <div class="os-table-wrap"><table class="os-table"><thead><tr><th>Container Type</th><th>Extra per container</th><th>Status</th><th></th></tr></thead><tbody id="containerTypesBody"></tbody></table></div>
+          <div class="os-add" style="margin-top:14px"><div class="os-form">
+            <div><label>New Container Type</label><input id="newContainerTypeName" placeholder="e.g. Small, Slim, Round"></div>
+            <div><label>Extra per container (₱)</label><input id="newContainerTypeAdjustment" type="number" min="-999999" step="0.01" value="0"></div>
+            <div style="display:flex;align-items:end"><button class="os-btn primary" onclick="addContainerType()">＋ Add Container Type</button></div>
+          </div></div>
         </div>
       </div>
     </div>
@@ -1291,11 +1399,11 @@ main{
 
 function showSettingsTab(tab){
   document.querySelectorAll('.os-settings-tab').forEach(b=>b.classList.toggle('active',b.dataset.settingsTab===tab));
-  ['products','personnel','inventory','settings-core'].forEach(id=>{
+  ['products','container-types','personnel','inventory','settings-core'].forEach(id=>{
     const el=document.getElementById('settingsPanel-'+id);
     if(el) el.classList.toggle('hidden',id!==tab);
   });
-  if(tab==='products' || tab==='personnel'){ loadOwnerSettings(); if(tab==='personnel') showPersonnelTab('employees'); }
+  if(tab==='products' || tab==='personnel' || tab==='container-types'){ loadOwnerSettings(); if(tab==='personnel') showPersonnelTab('employees'); if(tab==='container-types') loadContainerTypesSettings(); }
   if(tab==='settings-core') loadBusinessInfoSettings();
 }
 function showInventoryTab(tab){
@@ -1357,9 +1465,9 @@ function resetDeliveryOrderForm(){
   $("summaryAddress").textContent="Select a customer to see the address.";
   $("summaryMap").classList.add("hidden");
   $("cMap").classList.add("hidden");
-  $("deliveryProduct").value="";
-  $("deliveryQty").value=1;
-  $("deliveryPrice").value="";
+  customerPriceMap={};
+  $("deliveryItems").innerHTML="";
+  addDeliveryItemRow();
   $("deliveryNotes").value="";
   $("customerForm").classList.add("hidden");
   $("deliveryMsg").innerHTML="";
@@ -1387,7 +1495,8 @@ const SUPABASE_KEY="sb_publishable_WH09foPTB8Z4CSbcBhkyXg_7h_ppMP-";
 const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const $=id=>document.getElementById(id);
 const peso=n=>new Intl.NumberFormat("en-PH",{style:"currency",currency:"PHP"}).format(Number(n||0));
-let products=[],employees=[],customers=[];
+let products=[],employees=[],customers=[],customerPriceMap={},containerTypes=[];
+let deliveryRowCounter=0;
 
 
 function normalizeGoogleMapsLink(value){
@@ -1485,11 +1594,12 @@ async function enter(){
 }
 
 async function loadForm(){
+  await loadContainerTypes();
   const p=await db.from("products").select("id,name,unit,default_price,delivery_default_price").eq("active",true).order("name");
   if(p.error){console.error(p.error);return}
   products=p.data||[];
-  const deliveryOptions=products.filter(isDeliveryProduct).map(x=>'<option value="'+x.id+'">'+productLabel(x,"delivery")+"</option>").join("");
-  $("deliveryProduct").innerHTML='<option value="">Select delivery product...</option>'+deliveryOptions;
+  $("deliveryItems").innerHTML="";
+  addDeliveryItemRow();
   renderWalkinProducts(); renderCart(); calcWalkinTotal();
 
   const e=await db.from("employees").select("id,full_name,role").eq("active",true).in("role",["staff","owner"]).order("full_name");
@@ -1514,34 +1624,59 @@ async function loadCustomers(){
   showCustomer();
 }
 
-function showCustomer(){const c=customers.find(x=>x.id===$("customer").value);if(!c){show("customerInfo",false);$("summaryCustomer").textContent="Select a customer";$("summaryAddress").textContent="Select a customer to see the address.";show("summaryMap",false);deliveryCalc();return}show("customerInfo",true);$("cName").textContent=c.full_name;$("cPhone").textContent=c.mobile||"";$("cAddress").textContent=c.address||"Address not saved";$("cArea").textContent=c.area||"Area not set";const mapUrl=normalizeGoogleMapsLink(c.google_maps_url);
+function showCustomer(){const c=customers.find(x=>x.id===$("customer").value);if(!c){customerPriceMap={};show("customerInfo",false);$("summaryCustomer").textContent="Select a customer";$("summaryAddress").textContent="Select a customer to see the address.";show("summaryMap",false);deliveryCalc();return}show("customerInfo",true);$("cName").textContent=c.full_name;$("cPhone").textContent=c.mobile||"";$("cAddress").textContent=c.address||"Address not saved";$("cArea").textContent=c.area||"Area not set";const mapUrl=normalizeGoogleMapsLink(c.google_maps_url);
 if(mapUrl){$("cMap").href=mapUrl;show("cMap",true)}else show("cMap",false);
 $("summaryCustomer").textContent=c.full_name;$("summaryAddress").textContent=(c.address||"Address not saved")+" • "+(c.area||"Area not set");
-if(mapUrl){$("summaryMap").href=mapUrl;show("summaryMap",true)}else show("summaryMap",false);const p=products.find(x=>x.id===$("deliveryProduct").value);$("deliveryPrice").value=p?(c.assigned_price!=null?Number(c.assigned_price):Number(p.delivery_default_price||0)):"";deliveryCalc();}
+if(mapUrl){$("summaryMap").href=mapUrl;show("summaryMap",true)}else show("summaryMap",false);loadCustomerPrices(c.id).then(deliveryCalc);}
 
 
 let walkinCart={};
+let walkinSelectedTypes={};
 function cartTotal(){return Object.values(walkinCart).reduce((s,x)=>s+x.qty*x.price,0)}
+function defaultWalkinContainerTypeId(){return (containerTypes.find(t=>String(t.name).toLowerCase()==="round")||containerTypes[0])?.id||""}
+function walkinTypeForProduct(id){const selected=$("walkinType_"+id)?.value;return containerTypes.find(t=>t.id===(selected||walkinSelectedTypes[id]||walkinCart[id]?.containerTypeId||defaultWalkinContainerTypeId()))||null}
+function walkinPrice(p,typeId="") { const t=containerTypes.find(x=>x.id===typeId); return Number(p.default_price||0)+(p.unit==="container"?Number(t?.price_adjustment||0):0); }
+function walkinProductIllustration(p){
+  const n=String(p.name||"").toLowerCase();
+  if(n.includes("dispenser")) return `<svg viewBox="0 0 100 120" aria-hidden="true"><ellipse cx="50" cy="108" rx="29" ry="5" fill="#cfe5ef"/><path d="M30 40h40v58H30z" fill="#fff" stroke="#5c9ab9" stroke-width="2"/><path d="M35 45h30v29H35z" fill="#d8f1fc"/><path d="M38 18c0-8 24-8 24 0v19H38z" fill="#7bc4e5" stroke="#3c8eb7" stroke-width="2"/><path d="M41 20h18v15H41z" fill="#bdeafa"/><path d="M47 60h8v12h-8z" fill="#2e90bf"/><path d="M45 73h12v5H45z" fill="#2e90bf"/><path d="M38 88h24v5H38z" fill="#e7f6fb"/></svg>`;
+  if(p.unit==="liter") return `<svg viewBox="0 0 100 120" aria-hidden="true"><ellipse cx="50" cy="108" rx="26" ry="5" fill="#cfe5ef"/><path d="M41 12h18v12l8 10v60c0 7-5 10-17 10s-17-3-17-10V34l8-10z" fill="#d7f1fb" stroke="#4699bf" stroke-width="2"/><path d="M38 48h24v39c0 4-4 6-12 6s-12-2-12-6z" fill="#79c7e8"/><path d="M42 14h16v8H42z" fill="#2c86b1"/><path d="M43 42h5v40h-5z" fill="#fff" opacity=".65"/></svg>`;
+  if(n.includes("container sale")) return `<svg viewBox="0 0 100 120" aria-hidden="true"><ellipse cx="50" cy="108" rx="30" ry="5" fill="#cfe5ef"/><path d="M23 39c0-7 54-7 54 0v50c0 8-54 8-54 0z" fill="#a8dff4" stroke="#428fb4" stroke-width="2"/><ellipse cx="50" cy="39" rx="27" ry="8" fill="#e9f8fd" stroke="#428fb4" stroke-width="2"/><ellipse cx="50" cy="39" rx="12" ry="4" fill="#6bb8da"/><path d="M31 50v33" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".75"/></svg>`;
+  return `<svg viewBox="0 0 100 120" aria-hidden="true"><ellipse cx="50" cy="108" rx="30" ry="5" fill="#cfe5ef"/><path d="M32 27c0-8 36-8 36 0v9l7 8v47c0 8-50 8-50 0V44l7-8z" fill="#8dd2ef" stroke="#428fb4" stroke-width="2"/><ellipse cx="50" cy="27" rx="18" ry="6" fill="#e9f8fd" stroke="#428fb4" stroke-width="2"/><ellipse cx="50" cy="27" rx="8" ry="3" fill="#5eadd2"/><path d="M38 46v39" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".7"/><path d="M30 62h40" stroke="#d4f1fc" stroke-width="2"/></svg>`;
+}
 function renderWalkinProducts(){
   const box=$("walkinProducts");
   box.innerHTML=products.map(p=>{
-    const q=walkinCart[p.id]?.qty||0;
-    return `<div class="product-row"><div class="product-info"><strong>${p.name}</strong><span>₱${Number(p.default_price||0).toFixed(2)} / ${p.unit}</span></div><div class="qty-control"><button type="button" onclick="changeWalkinQty('${p.id}',-1)">−</button><input type="number" min="0" step="1" value="${q}" oninput="setWalkinQty('${p.id}',this.value)"><button type="button" onclick="changeWalkinQty('${p.id}',1)">+</button></div></div>`;
+    const item=walkinCart[p.id],q=item?.qty||0;
+    const typeId=item?.containerTypeId||walkinSelectedTypes[p.id]||defaultWalkinContainerTypeId();
+    const type=containerTypes.find(t=>t.id===typeId)||null;
+    const price=walkinPrice(p,typeId);
+    const typePicker=p.unit==="container"?`<label class="walkin-type-wrap">Container Type<select class="walkin-type-select" id="walkinType_${p.id}" onchange="changeWalkinContainerType('${p.id}',this.value)">${containerTypes.filter(t=>t.active).map(t=>`<option value="${t.id}" ${t.id===typeId?'selected':''}>${esc(t.name)}</option>`).join("")}</select></label>`:"";
+    return `<div class="product-row"><div class="product-visual">${walkinProductIllustration(p)}</div><div class="product-info"><strong>${esc(p.name)}</strong><span class="product-unit-price">${peso(price)} / ${esc(p.unit)}${p.unit==="container"&&Number(type?.price_adjustment||0)!==0?` · ${esc(type?.name||"")}`:""}</span><div class="walkin-controls">${typePicker}<label class="walkin-qty-wrap">Qty<div class="qty-control"><button type="button" aria-label="Decrease ${esc(p.name)} quantity" onclick="changeWalkinQty('${p.id}',-1)">−</button><input id="walkinQty_${p.id}" type="number" min="0" step="1" aria-label="${esc(p.name)} quantity" value="${q}" oninput="setWalkinQty('${p.id}',this.value)"><button type="button" aria-label="Increase ${esc(p.name)} quantity" onclick="changeWalkinQty('${p.id}',1)">+</button></div></label></div><div class="walkin-total"><span>Total Amount</span><strong id="walkinLineTotal_${p.id}">${peso(q*price)}</strong></div></div></div>`;
   }).join("");
 }
 function setWalkinQty(id,value){
-  const p=products.find(x=>x.id===id); const q=Math.max(0,Math.floor(Number(value)||0));
-  if(!q) delete walkinCart[id]; else walkinCart[id]={productId:id,name:p.name,unit:p.unit,price:Number(p.default_price||0),qty:q};
+  const p=products.find(x=>x.id===id); if(!p)return; const q=Math.max(0,Math.floor(Number(value)||0));
+  const restoreFocus=document.activeElement?.id===`walkinQty_${id}`;
+  const type=walkinTypeForProduct(id); const typeId=p.unit==="container"?(type?.id||defaultWalkinContainerTypeId()):null;
+  if(!q) delete walkinCart[id]; else walkinCart[id]={productId:id,name:p.name,unit:p.unit,price:walkinPrice(p,typeId),qty:q,containerTypeId:typeId,containerTypeName:type?.name||null};
+  renderWalkinProducts();renderCart();calcWalkinTotal();
+  if(restoreFocus){const input=$(`walkinQty_${id}`);if(input){input.focus();input.select();}}
+}
+function changeWalkinContainerType(id,typeId){
+  const p=products.find(x=>x.id===id);if(!p)return;
+  walkinSelectedTypes[id]=typeId;
+  if(walkinCart[id]){const t=containerTypes.find(x=>x.id===typeId);walkinCart[id].containerTypeId=typeId;walkinCart[id].containerTypeName=t?.name||null;walkinCart[id].price=walkinPrice(p,typeId);}
   renderWalkinProducts();renderCart();calcWalkinTotal();
 }
 function changeWalkinQty(id,delta){setWalkinQty(id,(walkinCart[id]?.qty||0)+delta)}
 function renderCart(){
   const box=$("cartItems"),items=Object.values(walkinCart);
-  box.innerHTML=items.length?items.map(x=>`<div class="cart-line"><div><strong>${x.name}</strong><small>${x.qty} × ₱${x.price.toFixed(2)} / ${x.unit}</small></div><div class="cart-line-total">₱${(x.qty*x.price).toFixed(2)}</div></div>`).join(""):'<div class="empty-cart">No products selected yet.</div>';
+  box.innerHTML=items.length?items.map(x=>`<div class="cart-line"><div><strong>${esc(x.name)}${x.containerTypeName?` — ${esc(x.containerTypeName)}`:""}</strong><small>${x.qty} × ${peso(x.price)} / ${esc(x.unit)}</small></div><div class="cart-line-total">${peso(x.qty*x.price)}</div></div>`).join(""):'<div class="empty-cart">No products selected yet.</div>';
 }
 function calcWalkinTotal(){
   const total=cartTotal();
   $("total").textContent=peso(total);
+  products.forEach(p=>{const node=$("walkinLineTotal_"+p.id);if(node){const item=walkinCart[p.id];node.textContent=peso((item?.qty||0)*walkinPrice(p,item?.containerTypeId||walkinSelectedTypes[p.id]||defaultWalkinContainerTypeId()));}});
   updateWalkinChange();
   return total;
 }
@@ -1553,42 +1688,204 @@ function updateWalkinChange(){
 }
 
 
-function updateDeliveryPriceDisplay(){const p=products.find(x=>x.id===$("deliveryProduct").value);const price=Number($("deliveryPrice").value||0);$("deliveryPriceDisplay").textContent=p&&price?peso(price)+" / "+(p.unit==="day"?"day":"container"):"Price not configured";}
-function deliveryCalc(){const p=products.find(x=>x.id===$("deliveryProduct").value);const q=Number($("deliveryQty").value||0),price=Number($("deliveryPrice").value||0),total=q*price;$("deliveryTotal").textContent=peso(total);$("summaryProduct").textContent=p?p.name:"No product selected";$("summaryQty").textContent=p?`${q||0} × ${peso(price)} / ${p.unit}`:"—";$("summaryLineTotal").textContent=peso(total);updateDeliveryPriceDisplay();}
+async function loadCustomerPrices(customerId){
+  customerPriceMap={};
+  if(!customerId){deliveryCalc();return}
+  const {data,error}=await db.from("customer_prices").select("product_id,unit_price").eq("customer_id",customerId).eq("active",true).lte("effective_from",new Date().toISOString().slice(0,10)).or("effective_to.is.null,effective_to.gte."+new Date().toISOString().slice(0,10));
+  if(!error)(data||[]).forEach(x=>customerPriceMap[x.product_id]=Number(x.unit_price));
+  deliveryCalc();
+}
+function selectedContainerType(row){return containerTypes.find(x=>x.id===row.querySelector(".delivery-container-type")?.value)||null;}
+function effectiveDeliveryPrice(p,typeId=null){
+  if(!p)return 0;
+  let base=customerPriceMap[p.id];
+  const c=customers.find(x=>x.id===$("customer").value);
+  if(base==null && /^purified water/i.test(p.name||"") && c?.assigned_price!=null)base=Number(c.assigned_price);
+  if(base==null)base=Number(p.delivery_default_price||0);
+  const type=containerTypes.find(x=>x.id===(typeId||""));
+  return Number(base||0)+(p.unit==="container"?Number(type?.price_adjustment||0):0);
+}
+function addDeliveryItemRow(productId="",quantity=1,containerTypeId=""){
+  const wrap=$("deliveryItems");if(!wrap)return;
+  const rowId=++deliveryRowCounter;const row=document.createElement("div");row.className="delivery-item-row";row.dataset.rowId=String(rowId);row.dataset.productId=productId||"";
+  const options=products.filter(isDeliveryProduct).map(p=>`<option value="${String(p.name).replace(/&/g,"&amp;").replace(/"/g,"&quot;")}"></option>`).join("");
+  const selected=products.find(p=>p.id===productId);
+  const typeOptions=containerTypes.filter(t=>t.active).map(t=>`<option value="${t.id}" ${(containerTypeId===t.id || (!containerTypeId && t.name.toLowerCase()==="round"))?"selected":""}>${esc(t.name)}</option>`).join("");
+  row.innerHTML=`<div class="delivery-item-fields"><div class="delivery-field-product"><label>Product</label><input class="delivery-item-product" type="text" list="deliveryProductOptions-${rowId}" placeholder="Search product…" autocomplete="off" value="${selected?String(selected.name).replace(/&/g,"&amp;").replace(/"/g,"&quot;"):""}"><datalist id="deliveryProductOptions-${rowId}">${options}</datalist></div><div class="delivery-field-container-type"><label>Container Type</label><select class="delivery-container-type">${typeOptions}</select></div><div><label>TC / Qty</label><input class="delivery-item-qty" type="number" min="1" step="1" value="${quantity}"></div><div class="delivery-item-price-wrap"><label>Price / unit</label><div class="delivery-item-price locked-price">Select product</div></div><div class="delivery-item-line-total"><label>Total</label><strong class="delivery-item-total">₱0.00</strong></div><button type="button" class="delivery-remove" aria-label="Remove product" title="Remove product">×</button></div>`;
+  wrap.appendChild(row);
+  const productInput=row.querySelector(".delivery-item-product");
+  const typeSelect=row.querySelector(".delivery-container-type");
+  const syncProduct=()=>{const text=productInput.value.trim().toLowerCase();const match=products.filter(isDeliveryProduct).find(p=>(p.name||"").trim().toLowerCase()===text);row.dataset.productId=match?match.id:"";row.querySelector('.delivery-field-container-type').style.display=match?.unit==='container'?'':'none';row.querySelector('.delivery-item-fields').classList.toggle('has-container',match?.unit==='container');deliveryCalc();};
+  productInput.addEventListener("input",syncProduct);productInput.addEventListener("change",syncProduct);
+  typeSelect.onchange=deliveryCalc;
+  row.querySelector(".delivery-item-qty").oninput=deliveryCalc;
+  row.querySelector(".delivery-remove").onclick=()=>{if(wrap.children.length>1){row.remove();deliveryCalc()}else{productInput.value="";row.dataset.productId="";row.querySelector(".delivery-item-qty").value=1;deliveryCalc()}};
+  syncProduct();
+}
+function selectedDeliveryProduct(row){return products.find(x=>x.id===row.dataset.productId)||null;}
+function readDeliveryItems(){
+  return [...document.querySelectorAll(".delivery-item-row")].map(row=>{const p=selectedDeliveryProduct(row);const qty=Number(row.querySelector(".delivery-item-qty").value||0);const type=selectedContainerType(row);const price=effectiveDeliveryPrice(p,type?.id);return {product:p,product_id:p?.id||"",quantity:qty,unit_price:price,container_type_id:p?.unit==='container'?(type?.id||null):null,container_type_name:p?.unit==='container'?(type?.name||null):null,line_total:qty*price,row};}).filter(x=>x.product);
+}
+function deliveryCalc(){
+  const rows=readDeliveryItems();let total=0;
+  document.querySelectorAll(".delivery-item-row").forEach(row=>{const p=selectedDeliveryProduct(row);const type=selectedContainerType(row);const qty=Number(row.querySelector(".delivery-item-qty").value||0);const price=effectiveDeliveryPrice(p,type?.id);const line=qty*price;total+=line;row.querySelector(".delivery-item-price").textContent=p?(price>0?peso(price)+" / "+(p.unit==="day"?"day":"container")+(p.unit==='container'&&Number(type?.price_adjustment||0)>0?` (+${peso(type.price_adjustment)})`:"") :"Price not configured"):"Choose product";row.querySelector(".delivery-item-total").textContent=p?peso(line):"—";});
+  $("deliveryTotal").textContent=peso(total);
+  const summary=$("summaryDeliveryItems");
+  summary.innerHTML=rows.length?rows.map(x=>`<div class="summary-line"><div><strong>${esc(x.product.name)}${x.container_type_name?` — ${esc(x.container_type_name)}`:""}</strong><small>${x.quantity||0} × ${peso(x.unit_price)} / ${x.product.unit}</small></div><strong>${peso(x.line_total)}</strong></div>`).join(""):'<div class="summary-line"><div><strong>No product selected</strong><small>—</small></div><strong>₱0.00</strong></div>';
+}
+
+function normalizeCustomerName(v){
+  return String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim();
+}
+function customerNameSimilarity(a,b){
+  a=normalizeCustomerName(a); b=normalizeCustomerName(b); if(!a||!b)return 0; if(a===b)return 1;
+  const aa=a.split(' '),bb=b.split(' ');
+  const aset=new Set(aa),bset=new Set(bb); let common=0; aset.forEach(x=>{if(bset.has(x))common++});
+  const tokenScore=common/Math.max(aset.size,bset.size);
+  const lev=(x,y)=>{const prev=Array(y.length+1).fill(0);for(let j=0;j<=y.length;j++)prev[j]=j;for(let i=1;i<=x.length;i++){let cur=[i];for(let j=1;j<=y.length;j++)cur[j]=Math.min(cur[j-1]+1,prev[j]+1,prev[j-1]+(x[i-1]===y[j-1]?0:1));for(let j=0;j<=y.length;j++)prev[j]=cur[j]}return prev[y.length]};
+  const max=Math.max(a.length,b.length); const levScore=max?1-lev(a,b)/max:0;
+  return Math.max(tokenScore,levScore);
+}
+async function findSimilarCustomer(name,excludeId=null){
+  const q=normalizeCustomerName(name); if(!q)return null;
+  const list=(customers||[]).filter(c=>c.active!==false && c.id!==excludeId);
+  let best=null,bestScore=0;
+  for(const c of list){
+    const candidate=normalizeCustomerName(c.full_name||''); const score=candidate===q?1:((q.length>=4 && candidate.includes(q))?0.86:customerNameSimilarity(q,candidate));
+    if(score>bestScore){bestScore=score;best=c;}
+  }
+  return best && bestScore>=0.82 ? {customer:best,score:bestScore}:null;
+}
+function customerDuplicateChoice(match,name){
+  return new Promise(resolve=>{
+    const ov=$("customerDuplicateOverlay"), text=$("customerDupText"), box=$("customerDupMatch");
+    text.innerHTML=`<strong>"${escapeHtml(name)}"</strong> matches an existing customer record.`;
+    box.innerHTML=`<strong>${escapeHtml(match.customer.full_name||'Unnamed')}</strong>${match.customer.mobile?`<br>${escapeHtml(match.customer.mobile)}`:''}${match.customer.area?`<br>${escapeHtml(match.customer.area)}`:''}<br><span style="font-size:11px;color:#92772a">Name similarity: ${Math.round(match.score*100)}%</span>`;
+    ov.classList.remove('hidden'); ov.setAttribute('aria-hidden','false');
+    const finish=v=>{ov.classList.add('hidden');ov.setAttribute('aria-hidden','true');$('customerDupNo').onclick=null;$('customerDupYes').onclick=null;resolve(v)};
+    $('customerDupNo').onclick=()=>finish(false); $('customerDupYes').onclick=()=>finish(true);
+  });
+}
+let deliveryDuplicateOverrideName="";
+let newCustomerDupTimer=null;
+async function updateNewCustomerDuplicateHint(){
+  const name=$("newName").value.trim(), hint=$("newCustomerDuplicateHint");
+  if(!name){hint.classList.add("hidden");hint.innerHTML="";return;}
+  const match=await findSimilarCustomer(name);
+  if(!match){hint.classList.add("hidden");hint.innerHTML="";return;}
+  const c=match.customer;
+  hint.innerHTML=`<strong>Possible existing customer found:</strong> ${esc(c.full_name||"Unnamed")}${c.mobile?` · ${esc(c.mobile)}`:""}${c.area?` · ${esc(c.area)}`:""}<div>Is this the same customer?</div><div class="dup-hint-actions"><button type="button" class="dup-use" id="newCustomerUseExisting">No — use existing customer</button><button type="button" class="dup-different" id="newCustomerDifferent">Yes — different person</button></div>`;
+  hint.classList.remove("hidden");
+  $("newCustomerUseExisting").onclick=async()=>{
+    await loadCustomers();
+    $("customer").value=c.id;
+    $("deliveryCustomerSearch").value=c.full_name+(c.mobile?" • "+c.mobile:"");
+    showCustomer();$("customerForm").classList.add("hidden");hint.classList.add("hidden");hint.innerHTML="";
+    message("customerMsg","Existing customer selected.","ok");
+  };
+  $("newCustomerDifferent").onclick=()=>{
+    deliveryDuplicateOverrideName=normalizeCustomerName(name);
+    hint.classList.add("hidden");hint.innerHTML="";
+    message("customerMsg","Marked as a different person. You can save this customer.","ok");
+  };
+}
+$("newName").addEventListener("input",()=>{
+  deliveryDuplicateOverrideName="";
+  if(newCustomerDupTimer)clearTimeout(newCustomerDupTimer);
+  newCustomerDupTimer=setTimeout(updateNewCustomerDuplicateHint,300);
+});
 $("saveCustomer").onclick=async()=>{
   message("customerMsg","","");
   const name=$("newName").value.trim();
-  if(!name){message("customerMsg","Customer name is required.","err");return}
-  const {data,error}=await db.from("customers").insert({
-    full_name:name,
-    mobile:$("newPhone").value.trim()||null,
-    customer_type:$("newType").value,
-    area:$("newArea").value,
-    address:$("newAddress").value.trim()||null,
-    google_maps_url:normalizeGoogleMapsLink($("newMap").value),
-    assigned_price:$("newAssignedPrice").value?Number($("newAssignedPrice").value):null,
-    notes:$("newNotes").value.trim()||null
-  }).select("id").single();
-  if(error){message("customerMsg",error.message,"err");return}
-  message("customerMsg","Customer saved successfully.","ok");
-  await loadCustomers();$("customer").value=data.id;const savedCustomer=customers.find(x=>x.id===data.id);$("deliveryCustomerSearch").value=savedCustomer?savedCustomer.full_name:"";showCustomer();
-  ["newName","newPhone","newAddress","newMap","newAssignedPrice","newNotes"].forEach(id=>$(id).value="");
+  if(!name){message("customerMsg","Customer name is required.","err");return;}
+  try{
+    const possibleDuplicate=await findSimilarCustomer(name);
+    if(possibleDuplicate && deliveryDuplicateOverrideName!==normalizeCustomerName(name)){
+      const isDifferent=await customerDuplicateChoice(possibleDuplicate,name);
+      if(!isDifferent){
+        const existing=possibleDuplicate.customer;
+        await loadCustomers();$("customer").value=existing.id;$("deliveryCustomerSearch").value=existing.full_name+(existing.mobile?" • "+existing.mobile:"");showCustomer();$("customerForm").classList.add("hidden");
+        message("customerMsg","Existing customer selected.","ok");return;
+      }
+      deliveryDuplicateOverrideName=normalizeCustomerName(name);
+    }
+    const payload={
+      full_name:name,
+      mobile:$("newPhone").value.trim()||null,
+      customer_type:$("newType").value,
+      area:$("newArea").value,
+      address:$("newAddress").value.trim()||null,
+      google_maps_url:normalizeGoogleMapsLink($("newMap").value),
+      assigned_price:$("newAssignedPrice").value?Number($("newAssignedPrice").value):null,
+      notes:$("newNotes").value.trim()||null,
+      active:true
+    };
+    const {data,error}=await db.from("customers").insert(payload).select("id,full_name,mobile").single();
+    if(error){message("customerMsg","Could not save customer: "+error.message,"err");return;}
+    message("customerMsg","Customer saved successfully.","ok");
+    await loadCustomers();$("customer").value=data.id;$("deliveryCustomerSearch").value=data.full_name+(data.mobile?" • "+data.mobile:"");showCustomer();
+    $("customerForm").classList.add("hidden");
+    ["newName","newPhone","newAddress","newMap","newNotes"].forEach(id=>$(id).value="");$("newAssignedPrice").value="";
+    $("newCustomerDuplicateHint").classList.add("hidden");$("newCustomerDuplicateHint").innerHTML="";deliveryDuplicateOverrideName="";
+  }catch(err){
+    console.error("Save customer failed",err);
+    message("customerMsg","Could not save customer. "+(err?.message||"Please try again."),"err");
+  }
 };
 
 $("createDelivery").onclick=async()=>{
+  const btn=$("createDelivery");
+  if(btn.disabled)return;
   message("deliveryMsg","","");
-  const customerId=$("customer").value,productId=$("deliveryProduct").value;
-  const qty=Number($("deliveryQty").value||0),price=Number($("deliveryPrice").value||0);
+  const customerId=$("customer").value;
+  const items=readDeliveryItems();
   if(!customerId){message("deliveryMsg","Select or create a customer first.","err");return}
-  if(qty<=0){message("deliveryMsg","Enter a valid quantity.","err");return}
-  const {error}=await db.rpc("create_delivery_order",{
-    p_customer_id:customerId,p_product_id:productId,p_quantity:qty,
-    p_unit_price:price,p_notes:$("deliveryNotes").value.trim()||null
-  });
-  if(error){message("deliveryMsg",error.message,"err");return}
-  message("deliveryMsg","Pending delivery order created successfully.","ok");
-  await dashboard();
-  resetDeliveryOrderForm();
+  if(!items.length){message("deliveryMsg","Add at least one delivery product.","err");return}
+  if(items.some(x=>x.quantity<=0)){message("deliveryMsg","Enter a valid quantity for every product.","err");return}
+  if(items.some(x=>!x.unit_price||x.unit_price<0)){message("deliveryMsg","One or more products have no configured delivery price. Please ask the owner to configure the price.","err");return}
+  const payload=items.map(x=>({product_id:x.product_id,quantity:x.quantity,container_type_id:x.container_type_id}));
+  const notes=$("deliveryNotes").value.trim()||null;
+  const originalLabel=btn.textContent;
+  btn.disabled=true;btn.classList.add("is-saving");btn.textContent="Saving order…";
+  try{
+    let result=await db.rpc("create_delivery_order_multi_guarded",{
+      p_customer_id:customerId,p_items:payload,p_notes:notes,p_allow_duplicate:false
+    });
+    if(result.error){
+      const raw=String(result.error.message||"");
+      const marker=raw.indexOf("POSSIBLE_DUPLICATE|");
+      if(marker>=0){
+        const parts=raw.slice(marker).split("|");
+        const existingNo=parts[1]||"an existing order";
+        const existingStatus=(parts[2]||"unknown").replaceAll("_"," ").toUpperCase();
+        const existingWhen=parts[3]||"today";
+        const proceed=window.confirm(
+          "POSSIBLE DUPLICATE ORDER\n\nThis customer already has a matching order today.\n\nOrder: "+existingNo+"\nStatus: "+existingStatus+"\nCreated: "+existingWhen+"\n\nOK = create another order anyway.\nCancel = stop and check the existing order under Orders."
+        );
+        if(!proceed){
+          message("deliveryMsg","Order not created. Existing order: "+existingNo+" ("+existingStatus+").","err");
+          if(window.confirm("Would you like to open Orders and locate "+existingNo+" now?")){
+            showTab("orders");
+            const search=$("ordersSearch");
+            if(search){search.value=existingNo;search.dispatchEvent(new Event("input",{bubbles:true}));}
+          }
+          return;
+        }
+        result=await db.rpc("create_delivery_order_multi_guarded",{
+          p_customer_id:customerId,p_items:payload,p_notes:notes,p_allow_duplicate:true
+        });
+      }
+    }
+    if(result.error){message("deliveryMsg",result.error.message,"err");return}
+    message("deliveryMsg","Pending delivery order created successfully.","ok");
+    await dashboard();
+    resetDeliveryOrderForm();
+  }catch(err){
+    console.error("Create delivery order failed",err);
+    message("deliveryMsg","Could not create the order. "+(err?.message||"Please try again."),"err");
+  }finally{
+    btn.disabled=false;btn.classList.remove("is-saving");btn.textContent=originalLabel;
+  }
 };
 
 function hideDeliveryCustomerSearchResults(){show("deliveryCustomerSearchResults",false);}
@@ -1611,7 +1908,7 @@ $("deliveryCustomerSearch").oninput=e=>renderDeliveryCustomerSearchResults(e.tar
 $("deliveryCustomerSearch").onfocus=e=>{if(e.target.value.trim())renderDeliveryCustomerSearchResults(e.target.value);};
 $("deliveryCustomerSearch").onkeydown=e=>{if(e.key==="Escape")hideDeliveryCustomerSearchResults();};
 document.addEventListener("click",e=>{if(!e.target.closest(".customer-search-wrap"))hideDeliveryCustomerSearchResults();});
-$("customer").onchange=()=>{const c=customers.find(x=>x.id===$("customer").value);$("deliveryCustomerSearch").value=c?(c.full_name+(c.mobile?" • "+c.mobile:"")):"";showCustomer();};$("deliveryProduct").onchange=()=>{const c=customers.find(x=>x.id===$("customer").value),p=products.find(x=>x.id===$("deliveryProduct").value);$("deliveryPrice").value=p?(c?.assigned_price!=null?Number(c.assigned_price):Number(p.delivery_default_price||0)):"";deliveryCalc();};$("deliveryQty").oninput=deliveryCalc;$("newCustomer").onclick=()=>{const open=$("customerForm").classList.contains("hidden");show("customerForm",open);if(open)$("newName").focus();};
+$("customer").onchange=()=>{const c=customers.find(x=>x.id===$("customer").value);$("deliveryCustomerSearch").value=c?(c.full_name+(c.mobile?" • "+c.mobile:"")):"";showCustomer();};$("addDeliveryProduct").onclick=()=>addDeliveryItemRow();$("newCustomer").onclick=()=>{const open=$("customerForm").classList.contains("hidden");show("customerForm",open);if(open)$("newName").focus();};
 
 function updateWalkinPaymentFields(){
   const method=$("method").value;
@@ -1670,11 +1967,11 @@ $("complete").onclick=async()=>{
   const reference=$("reference").value.trim();
   if(method!=="cash"&&!reference){message("saleMsg","Enter the payment reference.","err");return}
 
-  const payload=items.map(x=>({product_id:x.productId,quantity:x.qty,unit_price:x.price}));
+  const payload=items.map(x=>({product_id:x.productId,quantity:x.qty,unit_price:x.price,container_type_id:x.containerTypeId||null,container_type_name:x.containerTypeName||null}));
   $("complete").disabled=true;
   message("saleMsg","Saving sale…","");
   try{
-    const {data,error}=await db.rpc("create_walk_in_sale_multi_v2",{
+    const {data,error}=await db.rpc("create_walk_in_sale_multi_v3",{
       p_items:payload,
       p_payment_method:method,
       p_served_by_employee_id:$("servedBy").value,
@@ -1754,7 +2051,7 @@ async function loadCustomerModule(){
 }
 
 function renderCustomerRows(){
-  const q=($('mainCustomerSearch').value||'').trim().toLowerCase();
+  const q=($('customerSearch').value||'').trim().toLowerCase();
   const area=$('customerAreaFilter').value,type=$('customerTypeFilter').value;
   const rows=customers.filter(c=>{
     if(area&&c.area!==area)return false;
@@ -1783,6 +2080,13 @@ function editCustomer(id){
 async function saveMainCustomer(){
   message('mainCustomerMsg','',''); const id=$('customerEditId').value||null, name=$('mainCustomerName').value.trim();
   if(!name){message('mainCustomerMsg','Customer name is required.','err');return}
+  const possibleDuplicate=await findSimilarCustomer(name,id);
+  if(possibleDuplicate){
+    const isDifferent=await customerDuplicateChoice(possibleDuplicate,name);
+    if(!isDifferent){
+      closeNewCustomerForm(); openCustomerProfile(possibleDuplicate.customer.id); return;
+    }
+  }
   const payload={full_name:name,mobile:$('mainCustomerPhone').value.trim()||null,customer_type:$('mainCustomerType').value,area:$('mainCustomerArea').value,city_municipality:$('mainCustomerCity').value.trim()||null,address:$('mainCustomerAddress').value.trim()||null,google_maps_url:normalizeGoogleMapsLink($('mainCustomerMap').value),assigned_price:$('mainCustomerPrice').value?Number($('mainCustomerPrice').value):null,notes:$('mainCustomerNotes').value.trim()||null,active:true};
   let res=id?await db.from('customers').update(payload).eq('id',id).select('id').single():await db.from('customers').insert(payload).select('id').single();
   if(res.error){message('mainCustomerMsg',res.error.message,'err');return}
@@ -1808,21 +2112,23 @@ function closeCustomerProfile(){$('customerProfileModal').classList.add('hidden'
 $('newCustomerMain').onclick=openNewCustomerForm;
 $('cancelCustomerForm').onclick=closeNewCustomerForm;
 $('saveMainCustomer').onclick=saveMainCustomer;
-$('mainCustomerSearch').oninput=renderCustomerRows;
+$('customerSearch').oninput=renderCustomerRows;
 $('customerAreaFilter').onchange=renderCustomerRows;
 $('customerTypeFilter').onchange=renderCustomerRows;
 $('customerProfileModal').addEventListener('click',e=>{if(e.target.id==='customerProfileModal')closeCustomerProfile()});
 
 async function dashboard(){
   const now=new Date();
-  const phDate=now.toLocaleDateString("en-CA",{timeZone:"Asia/Manila"});
-  $("date").textContent=new Intl.DateTimeFormat("en-PH",{dateStyle:"full",timeZone:"Asia/Manila"}).format(now);
+  const calendarDate=now.toLocaleDateString("en-CA",{timeZone:"Asia/Manila"});
 
-  // Philippine local-day boundaries, used by today's payments and weekly sales.
-  const start=`${phDate}T00:00:00+08:00`;
-  const next=new Date(new Date(start).getTime()+86400000).toISOString();
-
+  // The POS now works on a BUSINESS DATE. Once EOD is closed, the next
+  // transaction belongs to the following business date even if the wall clock
+  // is still on the same calendar day.
   const a=await db.from("staff_dashboard_today").select("*").single();
+  const businessDate=a.data?.report_date||calendarDate;
+  const businessDateObj=new Date(`${businessDate}T12:00:00+08:00`);
+  $("date").textContent=new Intl.DateTimeFormat("en-PH",{dateStyle:"full",timeZone:"Asia/Manila"}).format(businessDateObj);
+
   if(a.data){
     $("sales").textContent=peso(a.data.total_sales);
     $("qty").textContent=Number(a.data.total_qty_delivered||0);
@@ -1830,6 +2136,7 @@ async function dashboard(){
     $("otw").textContent=a.data.on_the_way_orders||0;
     $("delivered").textContent=a.data.delivered_orders||0;
   }
+
   const p=await db.from("staff_dashboard_payments_today").select("*").single();
   if(p.data){
     $("cash").textContent=peso(p.data.cash);
@@ -1840,10 +2147,10 @@ async function dashboard(){
     $("deposit").textContent=peso(p.data.cash_for_deposit);
   }
 
-  // Break previous-credit collections down by payment method.
+  // Previous-credit collections belong to the business date on which they were received.
   const {data:collectionRows}=await db.from("credit_collections")
     .select("amount,payment_method")
-    .gte("collected_at",start).lt("collected_at",next);
+    .eq("business_date",businessDate);
 
   let cashCollections=0,gcashCollections=0,bankCollections=0;
   (collectionRows||[]).forEach(c=>{
@@ -1860,23 +2167,18 @@ async function dashboard(){
   const paymentsMade=Number(p.data?.cash||0)+Number(p.data?.gcash||0)+Number(p.data?.bank_transfer||0)+cashCollections+gcashCollections+bankCollections;
   $("paymentsToday").textContent=peso(paymentsMade);
 
-  // Current week is Sunday through today, using Philippine store time.
-  // Keep this query independent from the detailed customer query so the weekly graph
-  // can never disappear just because a lower dashboard section has a data error.
-  const todayPH=new Date(`${phDate}T12:00:00+08:00`);
-  const day=todayPH.getDay(); // Sunday = 0
-  const weekStartDate=new Date(todayPH);
-  weekStartDate.setDate(todayPH.getDate()-day);
+  // Current business week is Sunday through the current BUSINESS DATE.
+  const day=businessDateObj.getDay();
+  const weekStartDate=new Date(businessDateObj);
+  weekStartDate.setDate(businessDateObj.getDate()-day);
   const wsY=weekStartDate.getFullYear(), wsM=String(weekStartDate.getMonth()+1).padStart(2,"0"), wsD=String(weekStartDate.getDate()).padStart(2,"0");
-  const weekStart=`${wsY}-${wsM}-${wsD}T00:00:00+08:00`;
+  const weekStartDateStr=`${wsY}-${wsM}-${wsD}`;
 
   const weekly={
     North:{sales:0,tc:0}, South:{sales:0,tc:0},
     Central:{sales:0,tc:0}, "Walk-In":{sales:0,tc:0}
   };
 
-  // Always render the graph structure first so a slow/failed query can never
-  // leave a large empty box on the Dashboard.
   function renderWeeklyChart(){
     const chart=$("weeklyChart");
     if(!chart) return;
@@ -1910,8 +2212,8 @@ async function dashboard(){
     const {data:weekOrders,error:weekError}=await db.from("orders")
       .select("channel,area,actual_qty,actual_amount")
       .eq("status","delivered")
-      .gte("created_at",weekStart)
-      .lt("created_at",next);
+      .gte("business_date",weekStartDateStr)
+      .lte("business_date",businessDate);
 
     if(weekError){
       console.error("Weekly dashboard error:",weekError.message);
@@ -1929,9 +2231,10 @@ async function dashboard(){
     console.error("Weekly dashboard exception:",err);
   }
 
-  // Detailed today-only rows power Area, Customer Type and Containers Collected.
-  // These are intentionally separate from the weekly graph.
-  const {data:orders,error}=await db.from("orders").select("id,channel,status,area,customer_id,actual_qty,actual_amount,containers_returned,customers(customer_type)").gte("created_at",start).lt("created_at",next);
+  const {data:orders,error}=await db.from("orders")
+    .select("id,channel,status,area,customer_id,actual_qty,actual_amount,containers_returned,customers(customer_type)")
+    .eq("business_date",businessDate);
+
   if(error){
     console.error("Dashboard detail error:",error.message);
   }
@@ -1950,7 +2253,6 @@ async function dashboard(){
   $("walkinType").textContent=walkins.length;
   $("containersCollected").textContent=deliveryRows.reduce((s,o)=>s+Number(o.containers_returned||0),0);
 }
-
 async function handlePasswordRecovery(){
   const hash=window.location.hash||"";
   if(!hash.includes("type=recovery")) return false;
@@ -2045,11 +2347,11 @@ $("savePasswordBtn").onclick=async()=>{
     }
     $("ordersList").innerHTML=rows.map(o=>{
       const total=Number(o.actual_amount||o.ordered_amount||0);
-      const qty=o.actual_qty!=null?o.actual_qty:o.order_items?.reduce((n,i)=>n+Number(i.delivered_qty??i.ordered_qty??0),0)||0;
+      const containerItems=(o.order_items||[]).filter(i=>i.product?.unit==="container");const orderedQty=containerItems.reduce((n,i)=>n+Number(i.ordered_qty||0),0);const actualQty=o.actual_qty!=null?Number(o.actual_qty):containerItems.reduce((n,i)=>n+Number(i.delivered_qty||0),0);const qty=o.status==='delivered'?actualQty:orderedQty;const qtyLabel=o.status==='delivered'?'TC Delivered':'TC Ordered';
       const selected=o.id===selectedOrderId?" selected":"";
       return `<div class="order-row${selected}" data-id="${o.id}">
         <div class="order-row-top"><div><div class="order-number">${o.order_no||"Order"}</div><div class="order-customer">${o.customer?.full_name||"Walk-In"}</div></div><div class="order-row-total">${peso(total)}</div></div>
-        <div class="order-row-meta"><span class="status-chip ${orderStatusClass(o.status)}">${orderStatusLabel(o.status)}</span><span>${o.area||"Walk-In"}</span><span>${qty} TC</span><span>${fmtDate(o.created_at)}</span></div>
+        <div class="order-row-meta"><span class="status-chip ${orderStatusClass(o.status)}">${orderStatusLabel(o.status)}</span><span>${o.area||"Walk-In"}</span><span>${qty} ${qtyLabel}</span><span>${fmtDate(o.created_at)}</span></div>
       </div>`;
     }).join("");
     document.querySelectorAll(".order-row").forEach(el=>el.onclick=()=>selectOrder(el.dataset.id));
@@ -2066,12 +2368,15 @@ $("savePasswordBtn").onclick=async()=>{
     selectedOrderId=o?.id||null;
     renderOrders();
     if(!o){$("orderDetailPanel").innerHTML='<div class="detail-empty"><div class="detail-empty-icon">📋</div><h3>Select an order</h3><p>Choose an order from the list to view its details and continue the delivery workflow.</p></div>';return}
-    const item=o.order_items?.[0];
-    const deliveredQty=Number(item?.delivered_qty||0);
-    const orderedQty=Number(item?.ordered_qty||0);
-    const qty=(o.status==="delivered" || deliveredQty>0) ? deliveredQty : orderedQty;
+    const items=o.order_items||[];
+    const containerItems=items.filter(i=>i.product?.unit==="container");
+    const orderedQty=containerItems.reduce((n,i)=>n+Number(i.ordered_qty||0),0);
+    const deliveredQty=containerItems.reduce((n,i)=>n+Number(i.delivered_qty||0),0);
+    const qty=(o.status==="delivered" || items.some(i=>Number(i.delivered_qty||0)>0)) ? deliveredQty : orderedQty;
+    const item=items[0];
     const unit=Number(item?.unit_price||0);
-    const total=Number(o.actual_amount||o.ordered_amount||qty*unit||0);
+    const total=Number(o.actual_amount||o.ordered_amount||items.reduce((n,i)=>n+Number(i.ordered_qty||0)*Number(i.unit_price||0),0));
+    const productLines=items.map(i=>{const isDelivered=o.status==="delivered";const shownQty=isDelivered?Number(i.delivered_qty||0):Number(i.ordered_qty||0);const lineAmount=isDelivered?Number(i.line_total||0):Number(i.ordered_qty||0)*Number(i.unit_price||0);const type=i.container_type_name?` — ${i.container_type_name}`:"";return `<div class="detail-item"><div><strong>${i.product?.name||"Product"}${type}</strong><span> Unit price: ${peso(i.unit_price)} / ${i.product?.unit||"unit"}</span></div><strong>${shownQty} × ${peso(i.unit_price)}<br>${peso(lineAmount)}</strong></div>`}).join("");
     const customer=o.customer;
     let actions="";
     if(o.status==="pending"){
@@ -2092,11 +2397,11 @@ $("savePasswordBtn").onclick=async()=>{
           <div class="detail-info"><span>Delivery Personnel</span><strong>${(()=>{const team=(o.order_contributors||[]).filter(c=>c.contribution_type==="delivery").map(c=>c.employee?.full_name).filter(Boolean);return team.length?team.join("<br>"):(o.delivery_personnel?.full_name||"Not assigned")})()}</strong></div>
           <div class="detail-info"><span>On the Way</span><strong>${fmtDate(o.on_the_way_at)}</strong></div>
         </div>
-        <div class="detail-section-title">DELIVERY QUANTITY</div>
-        <div class="detail-item"><div><strong>${item?.product?.name||"Product"}</strong><span> Unit price: ${peso(unit)} / ${item?.product?.unit||"unit"}</span></div><strong>${peso(qty*unit)}</strong></div>
-        <div class="detail-item"><span>Containers Ordered</span><strong>${orderedQty}</strong></div>
-        <div class="detail-item"><span>Actual Containers Delivered</span><strong>${o.status==="delivered" ? deliveredQty : "—"}</strong></div>
-        <div class="detail-item"><span>Delivery Variance</span><strong>${o.status==="delivered" ? (deliveredQty-orderedQty>0 ? "+" : "") + (deliveredQty-orderedQty) : "—"}</strong></div>
+        <div class="detail-section-title">DELIVERY PRODUCTS</div>
+        ${productLines}
+        <div class="detail-item"><span>TC Ordered (Containers)</span><strong>${orderedQty}</strong></div>
+        <div class="detail-item"><span>TC Delivered (Actual Containers)</span><strong>${o.status==="delivered" ? deliveredQty : "—"}</strong></div>
+        <div class="detail-item"><span>TC Variance</span><strong>${o.status==="delivered" ? (deliveredQty-orderedQty>0 ? "+" : "") + (deliveredQty-orderedQty) : "—"}</strong></div>
         <div class="detail-item"><span>Containers Returned</span><strong>${o.containers_returned??0}</strong></div>
         ${o.status==="delivered" && orderedQty!==deliveredQty ? `<div class="delivery-variance-note">⚠️ <strong>Delivery variance:</strong> ${deliveredQty>orderedQty ? `${deliveredQty-orderedQty} extra container${deliveredQty-orderedQty===1?"":"s"} delivered.` : `${orderedQty-deliveredQty} fewer container${orderedQty-deliveredQty===1?"":"s"} delivered than originally ordered.`} The final sale amount is based on the actual quantity delivered.</div>` : ""}
         <div class="detail-item"><span>Received By</span><strong>${o.received_by||"—"}</strong></div>
@@ -2118,7 +2423,7 @@ $("savePasswordBtn").onclick=async()=>{
       created_at,customer_id,
       customer:customers(id,full_name,mobile,customer_type),
       delivery_personnel:employees!orders_delivery_personnel_id_fkey(id,full_name),
-      order_items(id,ordered_qty,delivered_qty,unit_price,line_total,
+      order_items(id,ordered_qty,delivered_qty,unit_price,line_total,container_type_id,container_type_name,
         product:products(id,name,unit)),
       payments(id,amount,payment_method,reference_number,received_at),
       order_contributors(id,employee_id,contribution_type,employee:employees(id,full_name))
@@ -2195,71 +2500,40 @@ $("savePasswordBtn").onclick=async()=>{
   function showCompleteBox(o){
     const body=document.querySelector("#orderDetailPanel .detail-body");
     if(!body||document.getElementById("completeDeliveryBox"))return;
-    const item=o.order_items?.[0];
-    const ordered=Number(item?.ordered_qty||o.actual_qty||0);
-    const price=Number(item?.unit_price||0);
-    const box=document.createElement("div");
-    box.className="delivery-complete-box";box.id="completeDeliveryBox";
-    box.innerHTML=`<h4>Complete Delivery</h4>
-      <div class="complete-grid">
-        <div><label>Actual Qty Delivered</label><input id="actualDelivered" type="number" min="0" step="1" value="${ordered}"></div>
-        <div><label>Containers Returned</label><input id="containersReturned" type="number" min="0" step="1" value="0"></div>
-        <div><label>Received By</label><input id="receivedBy" placeholder="Name of receiver"></div>
-        <div><label>Payment</label><select id="completePaymentStatus"><option value="paid">Paid</option><option value="credit">Unpaid / Credit</option></select></div>
-        <div id="completePaymentMethodWrap" class="full"><label>Payment Method</label><select id="completePaymentMethod"><option value="cash">Cash</option><option value="gcash">GCash</option><option value="bank_transfer">Bank Transfer</option><option value="other">Other</option></select></div>
-        <div id="completeAmountWrap"><label>Amount Collected</label><input id="completeAmount" type="number" min="0" step="0.01" value="${ordered*price}"></div>
-        <div id="completeRefWrap"><label>Reference Number (optional)</label><input id="completeRef"></div>
-        <div class="full"><div id="deliveryContributors" class="contributors-box"></div></div>
-        <div class="full"><button class="action-primary" id="finishDelivery">Complete Delivery</button></div>
-      </div>`;
-    body.appendChild(box);
-    renderDeliveryContributors(o);
-    $("completePaymentStatus").onchange=()=>{
-      const paid=$("completePaymentStatus").value==="paid";
-      $("completePaymentMethodWrap").style.display=paid?"block":"none";
-      $("completeAmountWrap").style.display=paid?"block":"none";
-      $("completeRefWrap").style.display=paid&&$("completePaymentMethod").value!=="cash"?"block":"none";
-    };
-    $("completePaymentMethod").onchange=()=>{$("completeRefWrap").style.display=$("completePaymentMethod").value==="cash"?"none":"block"};
-    $("completePaymentStatus").dispatchEvent(new Event("change"));
-    $("actualDelivered").oninput=()=>{$("completeAmount").value=(Number($("actualDelivered").value||0)*price).toFixed(2)};
-    $("finishDelivery").onclick=()=>finishDelivery(o);
+    const items=o.order_items||[];
+    const box=document.createElement("div");box.className="delivery-complete-box";box.id="completeDeliveryBox";
+    const itemInputs=items.map((it,idx)=>`<div class="full actual-item-row" data-item-id="${it.id}" data-price="${Number(it.unit_price||0)}"><label>${it.product?.name||"Product"}${it.container_type_name?` — ${it.container_type_name}`:""} — Actual Qty Delivered</label><input class="actual-item-qty" id="actualItem${idx}" type="number" min="0" step="1" value="${Number(it.ordered_qty||0)}"><small>Ordered: ${Number(it.ordered_qty||0)} · ${peso(it.unit_price)} per ${it.product?.unit||"unit"}</small></div>`).join("");
+    const initial=items.reduce((sum,it)=>sum+Number(it.ordered_qty||0)*Number(it.unit_price||0),0);
+    box.innerHTML=`<h4>Complete Delivery</h4><div class="complete-grid">${itemInputs}
+      <div><label>Containers Returned</label><input id="containersReturned" type="number" min="0" step="1" value="0"></div>
+      <div><label>Received By</label><input id="receivedBy" placeholder="Name of receiver"></div>
+      <div><label>Payment</label><select id="completePaymentStatus"><option value="paid">Paid</option><option value="credit">Unpaid / Credit</option></select></div>
+      <div id="completePaymentMethodWrap" class="full"><label>Payment Method</label><select id="completePaymentMethod"><option value="cash">Cash</option><option value="gcash">GCash</option><option value="bank_transfer">Bank Transfer</option><option value="other">Other</option></select></div>
+      <div id="completeAmountWrap"><label>Amount Collected</label><input id="completeAmount" type="number" min="0" step="0.01" value="${initial.toFixed(2)}"></div>
+      <div id="completeRefWrap"><label>Reference Number (optional)</label><input id="completeRef"></div>
+      <div class="full"><strong>Actual Delivery Total: <span id="actualDeliveryTotal">${peso(initial)}</span></strong></div>
+      <div class="full"><div id="deliveryContributors" class="contributors-box"></div></div>
+      <div class="full"><button class="action-primary" id="finishDelivery">Complete Delivery</button></div></div>`;
+    body.appendChild(box);renderDeliveryContributors(o);
+    const calc=()=>{const total=[...box.querySelectorAll(".actual-item-row")].reduce((n,row)=>n+Math.max(0,Number(row.querySelector(".actual-item-qty").value||0))*Number(row.dataset.price||0),0);$("actualDeliveryTotal").textContent=peso(total);$("completeAmount").value=total.toFixed(2);};
+    box.querySelectorAll(".actual-item-qty").forEach(input=>input.oninput=calc);
+    $("completePaymentStatus").onchange=()=>{const paid=$("completePaymentStatus").value==="paid";$("completePaymentMethodWrap").style.display=paid?"block":"none";$("completeAmountWrap").style.display=paid?"block":"none";$("completeRefWrap").style.display=paid&&$("completePaymentMethod").value!=="cash"?"block":"none";};
+    $("completePaymentMethod").onchange=()=>{$("completeRefWrap").style.display=$("completePaymentMethod").value==="cash"?"none":"block";};
+    $("completePaymentStatus").dispatchEvent(new Event("change"));$("finishDelivery").onclick=()=>finishDelivery(o);
   }
   async function finishDelivery(o){
-    const qty=Number($("actualDelivered").value||0), returned=Number($("containersReturned").value||0);
-    const received=($("receivedBy").value||"").trim(), ps=$("completePaymentStatus").value;
-    if(qty<=0){alert("Enter the actual quantity delivered.");return}
-    if(returned<0){alert("Containers returned cannot be negative.");return}
-    if(!received){alert("Enter who received the delivery.");return}
-
-    const contributors=readDeliveryContributors();
-    if(!contributors.length){alert("Add at least one sales/service contributor.");return}
-    const paymentStatus=ps==="paid"?"paid":"credit";
-    const method=paymentStatus==="paid"?$("completePaymentMethod").value:null;
-    const amount=qty*Number(o.order_items?.[0]?.unit_price||0);
-    const amountReceived=paymentStatus==="paid"?Number($("completeAmount").value||0):0;
-    const ref=paymentStatus==="paid"?($("completeRef").value||null):null;
-
-    if(paymentStatus==="paid" && amountReceived<amount){
-      alert("Amount received is less than the delivery amount.");return
-    }
-
-    const {error}=await db.rpc("complete_delivery_order_v2",{
-      p_order_id:o.id,
-      p_actual_qty:qty,
-      p_containers_returned:returned,
-      p_received_by:received,
-      p_payment_status:paymentStatus,
-      p_payment_method:method,
-      p_amount_received:amountReceived,
-      p_reference_number:ref,
-      p_notes:null,
-      p_contributors:contributors
-    });
-    if(error){alert(error.message);return}
-    await loadOrders();
-    if(typeof dashboard==='function') await dashboard();
-    renderDetail(allOrders.find(x=>x.id===o.id));
+    const returned=Number($("containersReturned").value||0),received=($("receivedBy").value||"").trim(),ps=$("completePaymentStatus").value;
+    if(returned<0){alert("Containers returned cannot be negative.");return}if(!received){alert("Enter who received the delivery.");return}
+    const actualItems=[...document.querySelectorAll("#completeDeliveryBox .actual-item-row")].map(row=>({order_item_id:row.dataset.itemId,delivered_qty:Number(row.querySelector(".actual-item-qty").value||0)}));
+    if(actualItems.some(x=>!Number.isFinite(x.delivered_qty)||x.delivered_qty<0)){alert("Enter a valid actual quantity for every product.");return}
+    const amount=actualItems.reduce((sum,x)=>{const it=(o.order_items||[]).find(i=>i.id===x.order_item_id);return sum+x.delivered_qty*Number(it?.unit_price||0)},0);
+    if(amount<=0){alert("Actual delivery total must be greater than zero.");return}
+    const contributors=readDeliveryContributors();if(!contributors.length){alert("Add at least one sales/service contributor.");return}
+    const paymentStatus=ps==="paid"?"paid":"credit",method=paymentStatus==="paid"?$("completePaymentMethod").value:null;
+    const amountReceived=paymentStatus==="paid"?Number($("completeAmount").value||0):0,ref=paymentStatus==="paid"?($("completeRef").value||null):null;
+    if(paymentStatus==="paid"&&amountReceived<amount){alert("Amount received is less than the delivery amount.");return}
+    const {error}=await db.rpc("complete_delivery_order_multi_v3",{p_order_id:o.id,p_actual_items:actualItems,p_containers_returned:returned,p_received_by:received,p_payment_status:paymentStatus,p_payment_method:method,p_amount_received:amountReceived,p_reference_number:ref,p_notes:null,p_contributors:contributors});
+    if(error){alert(error.message);return}await loadOrders();if(typeof dashboard==="function")await dashboard();renderDetail(allOrders.find(x=>x.id===o.id));
   }
 
   async function cancelSelected(o){
@@ -2456,14 +2730,18 @@ function eodDayBounds(dateStr){return {start:`${dateStr}T00:00:00+08:00`,next:ne
 function eodSetMsg(text,type){const el=$("eodCloseMsg");if(!el)return;el.className=type==='ok'?'eod-msg-ok':'eod-msg-err';el.textContent=text||'';}
 function eodRenderRecon(){const expected=Number(eodSummary.expected||0),actual=Number($("eodActualCash")?.value||0),diff=actual-expected;$("eodExpectedCashBox").textContent=eodPeso(expected);$("eodExpectedCash").textContent=eodPeso(expected);$("eodOverShort").textContent=eodPeso(diff);$("eodOverShort").style.color=diff===0?'#167a61':(diff>0?'#167a61':'#b33b3b');$("eodOverShortLabel").textContent=actual>0?(diff===0?'Balanced':(diff>0?'Cash over expected':'Cash short')):'Enter the actual cash counted.';}
 async function loadEOD(){
-  const input=$("eodDate");if(!input.value)input.value=eodDatePH();
+  const input=$("eodDate");
+  if(!input.value){
+    const {data:businessDate}=await db.rpc("current_business_date");
+    input.value=businessDate||eodDatePH();
+  }
   $("eodRefresh").onclick=loadEOD;$("eodActualCash").oninput=eodRenderRecon;
   $("eodCloseDay").onclick=closeEOD;
-  const date=input.value,b=eodDayBounds(date);
+  const date=input.value;
   eodSetMsg('','ok');
-  const {data:orders,error:oe}=await db.from('orders').select(`id,order_no,customer_id,channel,status,payment_status,payment_method,actual_amount,amount_collected,delivered_at,served_by_employee_id,delivery_personnel_id,customer:customers(full_name),served_by:employees!orders_served_by_employee_id_fkey(full_name),delivery_personnel:employees!orders_delivery_personnel_id_fkey(full_name),payments(amount,payment_method,reference_number,received_at),order_contributors(employee:employees(full_name,active))`).eq('status','delivered').gte('delivered_at',b.start).lt('delivered_at',b.next).order('delivered_at',{ascending:false});
+  const {data:orders,error:oe}=await db.from('orders').select(`id,order_no,customer_id,channel,status,payment_status,payment_method,actual_amount,amount_collected,delivered_at,business_date,served_by_employee_id,delivery_personnel_id,customer:customers(full_name),served_by:employees!orders_served_by_employee_id_fkey(full_name),delivery_personnel:employees!orders_delivery_personnel_id_fkey(full_name),payments(amount,payment_method,reference_number,received_at),order_contributors(employee:employees(full_name,active))`).eq('status','delivered').eq('business_date',date).order('delivered_at',{ascending:false});
   if(oe){console.error(oe);eodSetMsg(oe.message,'err');return;}
-  const {data:collections, error:ce}=await db.from('credit_collections').select('amount,payment_method,collected_at').gte('collected_at',b.start).lt('collected_at',b.next);
+  const {data:collections, error:ce}=await db.from('credit_collections').select('amount,payment_method,business_date').eq('business_date',date);
   if(ce){console.error(ce);}
   let sales=0,money=0,cashSales=0,gcashSales=0,bankSales=0,otherSales=0,cashCol=0,gcashCol=0,bankCol=0,otherCol=0;
   (orders||[]).forEach(o=>{sales+=Number(o.actual_amount||0);(o.payments||[]).forEach(p=>{const a=Number(p.amount||0);money+=a;if(p.payment_method==='cash')cashSales+=a;else if(p.payment_method==='gcash')gcashSales+=a;else if(p.payment_method==='bank_transfer')bankSales+=a;else otherSales+=a;});});
@@ -2478,6 +2756,38 @@ async function loadEOD(){
 async function loadEODHistory(){const {data,error}=await db.from('eod_closings').select('business_date,closed_at,expected_cash,actual_cash,over_short,status,closed_by:employees!eod_closings_closed_by_employee_id_fkey(full_name)').order('business_date',{ascending:false}).limit(20);if(error){console.error(error);$("eodHistoryBody").innerHTML=`<tr><td colspan="7" class="eod-empty">Unable to load closing history.</td></tr>`;return;}$("eodHistoryBody").innerHTML=(data||[]).length?data.map(x=>`<tr><td>${eodEsc(x.business_date)}</td><td>${new Date(x.closed_at).toLocaleString('en-PH',{timeZone:'Asia/Manila'})}</td><td>${eodEsc(x.closed_by?.full_name||'—')}</td><td>${eodPeso(x.expected_cash)}</td><td>${eodPeso(x.actual_cash)}</td><td style="color:${Number(x.over_short)<0?'#b33b3b':'#167a61'};font-weight:900">${eodPeso(x.over_short)}</td><td class="eod-status paid">${eodEsc(String(x.status||'closed').toUpperCase())}</td></tr>`).join(''):`<tr><td colspan="7" class="eod-empty">No closing records yet.</td></tr>`;}
 async function closeEOD(){const date=$("eodDate").value,actual=Number($("eodActualCash").value||0),expected=Number(eodSummary.expected||0),diff=actual-expected,notes=($("eodClosingNotes").value||'').trim()||null;if(!date){eodSetMsg('Select the business date.','err');return}if(actual<0){eodSetMsg('Actual cash cannot be negative.','err');return}if(Math.abs(diff)>0.009&&!notes){eodSetMsg('Please enter a closing note explaining the overage or shortage.','err');return}if(!window.currentEmployeeId){eodSetMsg('Your employee session could not be identified.','err');return}const {data:existing}=await db.from('eod_closings').select('id').eq('business_date',date).maybeSingle();if(existing){eodSetMsg('This business date has already been closed.','err');return}const {error}=await db.from('eod_closings').insert({business_date:date,total_sales:Number(eodSummary.sales||0),transaction_count:Number($("eodTransactions").textContent||0),total_money_received:Number(eodSummary.money||0),expected_cash:expected,actual_cash:actual,over_short:diff,closing_notes:notes,closed_by_employee_id:window.currentEmployeeId});if(error){eodSetMsg(error.message,'err');return}eodSetMsg('Day closed successfully. Closing record saved.','ok');await loadEODHistory();}
 window.loadEOD=loadEOD;
+
+async function loadContainerTypes(){
+  const {data,error}=await db.from('container_types').select('id,name,price_adjustment,active,sort_order').eq('active',true).order('sort_order').order('name');
+  if(error){console.warn('Container types could not be loaded',error.message);containerTypes=[];return;}
+  containerTypes=data||[];
+}
+async function loadContainerTypesSettings(){
+  if(window.currentEmployeeRole!=='owner'){message('settingsMsg','Owner access required.','err');return;}
+  const {data,error}=await db.from('container_types').select('id,name,price_adjustment,active,sort_order').order('sort_order').order('name');
+  if(error){message('settingsMsg',error.message,'err');return;}
+  $('containerTypesBody').innerHTML=(data||[]).map(t=>`<tr><td><input id="ctname_${t.id}" value="${escAttr(t.name)}" aria-label="Container type name"></td><td><input id="ctadj_${t.id}" type="number" min="-999999" step="0.01" value="${Number(t.price_adjustment||0).toFixed(2)}" aria-label="Price adjustment"></td><td><span class="os-status ${t.active?'active':'inactive'}">${t.active?'ACTIVE':'INACTIVE'}</span></td><td><div class="os-row-actions"><button class="os-mini" onclick="saveContainerType('${t.id}')">Save</button><button class="os-mini ${t.active?'danger':''}" onclick="toggleContainerType('${t.id}',${t.active})">${t.active?'Deactivate':'Activate'}</button></div></td></tr>`).join('')||'<tr><td colspan="4" class="os-empty">No container types configured.</td></tr>';
+}
+async function addContainerType(){
+  if(window.currentEmployeeRole!=='owner'){alert('Owner access required.');return;}
+  const name=$('newContainerTypeName').value.trim(), adjustment=Number($('newContainerTypeAdjustment').value||0);
+  if(!name){alert('Enter a container type name.');return;} if(!Number.isFinite(adjustment)){alert('Enter a valid price adjustment.');return;}
+  const {error}=await db.from('container_types').insert({name,price_adjustment:adjustment,active:true,sort_order:containerTypes.length+1});
+  if(error){alert(error.message);return;} $('newContainerTypeName').value='';$('newContainerTypeAdjustment').value='0';await loadContainerTypesSettings();await loadForm();
+}
+async function saveContainerType(id){
+  if(window.currentEmployeeRole!=='owner'){alert('Owner access required.');return;}
+  const name=$('ctname_'+id).value.trim(), adjustment=Number($('ctadj_'+id).value);
+  if(!name||!Number.isFinite(adjustment)){alert('Enter a valid name and price adjustment.');return;}
+  const {error}=await db.from('container_types').update({name,price_adjustment:adjustment,updated_at:new Date().toISOString()}).eq('id',id);
+  if(error){alert(error.message);return;}await loadContainerTypesSettings();await loadForm();
+}
+async function toggleContainerType(id,active){
+  if(window.currentEmployeeRole!=='owner'){alert('Owner access required.');return;}
+  if(active && containerTypes.filter(x=>x.active).length<=1){alert('Keep at least one active container type.');return;}
+  const {error}=await db.from('container_types').update({active:!active,updated_at:new Date().toISOString()}).eq('id',id);
+  if(error){alert(error.message);return;}await loadContainerTypesSettings();await loadForm();
+}
 
 async function loadOwnerSettings(){
   if(window.currentEmployeeRole!=='owner'){ message('settingsMsg','Owner access required.','err'); return; }
@@ -2580,5 +2890,19 @@ function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&l
 function escAttr(v){return esc(v).replace(/`/g,'&#96;');}
 
 </script>
+
+<div id="customerDuplicateOverlay" class="customer-dup-overlay hidden" aria-hidden="true">
+  <div class="customer-dup-modal" role="dialog" aria-modal="true" aria-labelledby="customerDupTitle">
+    <div class="customer-dup-icon">⚠️</div>
+    <div class="customer-dup-kicker">CUSTOMER CHECK</div>
+    <h3 id="customerDupTitle">Already an existing customer!</h3>
+    <p id="customerDupText">This name matches an existing customer record.</p>
+    <div id="customerDupMatch" class="customer-dup-match"></div>
+    <div class="customer-dup-actions">
+      <button id="customerDupNo" class="customer-dup-no">No — use existing customer</button>
+      <button id="customerDupYes" class="customer-dup-yes">Yes — different person</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
