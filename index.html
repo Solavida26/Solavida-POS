@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Solavida POS — V84 Walk-In Product Cards</title>
+<title>Solavida POS — V88 Stable</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--bg:#f5f8f7;--card:#fff;--text:#18322d;--muted:#71807c;--line:#dce7e3;--primary:#087f69;--soft:#e8f3f0}
@@ -808,6 +808,51 @@ main{
 #createDelivery.is-saving:before{content:"";position:absolute;left:18px;top:50%;width:13px;height:13px;margin-top:-7px;border:2px solid rgba(255,255,255,.45);border-top-color:#fff;border-radius:50%;animation:solavidaOrderSaving .75s linear infinite}
 @keyframes solavidaOrderSaving{to{transform:rotate(360deg)}}
 </style>
+<style id="v85-reports-style">
+#reports .r85-head{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}#reports .r85-filters,#reports .r85-tabs{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin:15px 0}#reports .r85-tabs button{background:#eaf4f6;border:1px solid #cfe0e9;border-radius:9px;padding:11px 13px;font-weight:700;color:#24516b}#reports .r85-tabs button.active{background:#087f69;color:white}#reports .r85-filters input,#reports .r85-filters select{width:auto;min-width:130px;padding:10px}#reports .r85-scroll{overflow:auto;background:white;border:1px solid #d8e5e1;border-radius:12px}#reports table{width:100%;border-collapse:collapse;font-size:13px}#reports th,#reports td{padding:13px 12px;text-align:left;border-bottom:1px solid #e6eeee;white-space:nowrap}#reports th{background:#eaf4f1;color:#234b43}#reports .r85-note{background:#fff8e7;border:1px solid #eddba8;border-radius:10px;padding:12px;margin:14px 0;color:#765d22}#reports .r85-kpis{display:flex;gap:12px;flex-wrap:wrap;margin:14px 0}#reports .r85-kpis>div{background:#fff;padding:17px;border:1px solid #d8e5e1;border-radius:12px;min-width:160px}#reports .r85-kpis strong{display:block;font-size:21px;margin-top:5px}#reports .r85-actions{display:flex;gap:8px;flex-wrap:wrap}
+</style>
+<style>
+.r85-sales-layout .r85-summary{display:grid;grid-template-columns:minmax(260px,0.8fr) minmax(0,1.4fr);gap:16px;align-items:start}.r85-sales-layout .r85-kpis{display:grid;grid-template-columns:1fr 1fr;margin:0}.r85-sales-layout .r85-summary th,.r85-sales-layout .r85-summary td{padding:10px}#r85CorrectionFields label{display:block;margin:12px 0}#r85CorrectionFields input,#r85CorrectionFields select,#r85CorrectionFields textarea{display:block;width:100%;box-sizing:border-box;padding:10px;border:1px solid #bed4e2;border-radius:8px}#r85CorrectionFields td{padding:8px}#r85Correction::backdrop{background:#00283b88}@media(max-width:1000px){.r85-sales-layout .r85-summary{grid-template-columns:1fr}}
+</style><style id="solavida-v87-transactions-style">
+/* Owner reports: transaction-table presentation only. Summary and other reports untouched. */
+#r85Transactions{color:#073f66}
+#r85Transactions h2{font-size:27px;margin:16px 0 10px;font-weight:800}
+#r85TransactionSearch{max-width:620px!important;border:1px solid #cbdde9;border-radius:10px;background:#fff}
+#r85TransactionCount{margin:3px 0 12px;font-size:13px}
+#r85Transactions .r85-scroll{border:1px solid #d9e8f0;border-radius:12px;overflow-x:auto}
+#r85Transactions table{width:100%;table-layout:fixed;border-collapse:collapse;font-size:13px;min-width:1020px}
+#r85Transactions thead th{background:#eaf6fc;color:#173f59;font-size:12px;font-weight:800}
+#r85Transactions th,#r85Transactions td{padding:11px 9px;vertical-align:middle;white-space:normal;overflow-wrap:normal}
+#r85Transactions th:nth-child(1){width:9%}#r85Transactions th:nth-child(2){width:9%}
+#r85Transactions th:nth-child(3){width:11%}#r85Transactions th:nth-child(4){width:16%}
+#r85Transactions th:nth-child(5){width:9%}#r85Transactions th:nth-child(6){width:9%}
+#r85Transactions th:nth-child(7){width:12%}#r85Transactions th:nth-child(8){width:14%}
+#r85Transactions th:nth-child(9){width:11%}
+#r85Transactions .r87-order-no{font-weight:800;color:#0b426e;white-space:nowrap}
+#r85Transactions .r87-customer{overflow-wrap:anywhere;color:#073f66}
+#r85Transactions .r87-reference{overflow-wrap:anywhere}
+#r85Transactions .r87-kind,#r85Transactions .r87-status{display:inline-block;border-radius:9px;padding:6px 8px;font-size:12px;font-weight:800;line-height:1.25}
+#r85Transactions .r87-kind{text-align:center;min-width:74px}
+#r85Transactions .r87-collection{background:#def2ff;color:#006db2}
+#r85Transactions .r87-sale{background:#efe4ff;color:#6332b7}
+#r85Transactions .r87-collected{background:#ddf8e9;color:#066941}
+#r85Transactions .r87-cancelled{background:#ffe1e7;color:#ad2039}
+#r85Transactions .r87-warning{background:#fff0c8;color:#9b5a00}
+#r85Transactions .r87-delivered{background:#dff0ff;color:#0069c0}
+#r85Transactions .r87-neutral{background:#edf2f5;color:#36546c}
+#r85Transactions .r87-action{background:#f0f1f2;color:#18344a;padding:9px 8px;font-size:12px;white-space:nowrap;width:100%}
+#r85Transactions .r87-action:hover{background:#e0edf6}
+</style>
+<style id="v88-owner-compact-style">
+/* V88: owner-only report spacing; leaves all staff pages untouched. */
+#reports .r85-head h1{margin:0 0 6px;line-height:1.18}
+#reports .r85-head{margin-top:0}
+#reports .r85-filters{margin:11px 0 9px}
+#reports .r85-tabs{margin:8px 0 12px}
+#reports .r85-summary{margin-top:0}
+#reports #r85Transactions{margin-top:12px!important}
+#reports #r85Transactions h2{margin:10px 0 8px}
+</style>
 </head>
 <body>
 
@@ -849,6 +894,7 @@ main{
     <button class="tab" data-tab="customers" onclick="showTab('customers')"><span class="tab-icon">♙</span><span>Customers</span></button>
     <button class="tab" data-tab="credit" onclick="showTab('credit')"><span class="tab-icon">₱</span><span>PO / Credit</span></button>
     <button class="tab" data-tab="eod" onclick="showTab('eod')"><span class="tab-icon">▣</span><span>End of Day</span></button>
+    <button class="tab" data-tab="reports" onclick="showTab('reports')"><span class="tab-icon">▤</span><span>Reports</span></button>
     <button class="tab" data-tab="settings" onclick="showTab('settings')"><span class="tab-icon">⚙</span><span>Settings</span></button>
     <button class="tab" data-tab="map" onclick="showTab('map')"><span class="tab-icon">⌖</span><span>Delivery / Map</span></button>
   </div>
@@ -1239,13 +1285,20 @@ main{
     <div class="eod-card eod-transactions-card">
       <div class="eod-card-title"><div><h2>📋 Today's Transactions</h2><div class="muted">All completed sales recorded for the selected business date • TC = actual containers delivered</div></div></div>
       <div class="eod-table-wrap"><table class="eod-table"><thead><tr><th>Order</th><th>Customer</th><th>Total</th><th>Paid</th><th>Method</th><th>Status</th><th>Attended By</th></tr></thead><tbody id="eodTransactionsBody"><tr><td colspan="7" class="eod-empty">No completed sales for this date.</td></tr></tbody></table></div>
-      <div class="eod-history-title">📁 Closing History</div>
-      <div class="muted eod-history-sub">Daily closing records already saved</div>
-      <div class="eod-table-wrap"><table class="eod-table history"><thead><tr><th>Date</th><th>Closed At</th><th>Closed By</th><th>Expected Cash</th><th>Actual Cash</th><th>Over / Short</th><th>Status</th></tr></thead><tbody id="eodHistoryBody"><tr><td colspan="7" class="eod-empty">No closing records yet.</td></tr></tbody></table></div>
+      <div class="eod-history-title">📁 Previous Collections</div>
+      <div class="muted eod-history-sub">Credit payments received on the selected business date, including fully paid accounts.</div>
+      <div class="eod-table-wrap"><table class="eod-table history"><thead><tr><th>Date / Time</th><th>Customer</th><th>Amount</th><th>Method</th><th>Reference</th><th>Received By</th><th>Notes</th></tr></thead><tbody id="eodCollectionsBody"><tr><td colspan="7" class="eod-empty">Select a date to load collections.</td></tr></tbody></table></div>
     </div>
   </div>
 </section>
 
+<section id="reports" class="hidden">
+ <div class="r85-head"><div><h1>Owner's Reports <small style="font-size:12px;color:#71807c">V88 test build</small></h1><div class="muted">Review sales and collections. Owner corrections require a reason and are recorded in the audit log.</div></div><div class="r85-actions"><button onclick="loadOwnerReports()">↻ Refresh</button><button onclick="exportOwnerReport()">Export CSV (Excel)</button><button onclick="window.print()">Print</button></div></div>
+ <div class="r85-filters"><label>From <input type="date" id="r85From"></label><label>To <input type="date" id="r85To"></label><select id="r85Preset" onchange="r85SetPreset(this.value)"><option value="month">This Month</option><option value="today">Today</option><option value="yesterday">Yesterday</option><option value="week">This Week</option><option value="last7">Last 7 Days</option><option value="last30">Last 30 Days</option><option value="custom">Custom Dates</option></select><button class="primary" onclick="loadOwnerReports()">Search</button></div>
+ <div class="r85-tabs" id="r85Tabs"></div><div id="r85Message" class="r85-note">Choose dates and refresh to view reports.</div><div class="r85-summary"><div id="r85Kpis" class="r85-kpis"></div><div id="r85Table" class="r85-scroll"></div></div>
+ <div id="r85Transactions" hidden style="margin-top:20px"><h2>All Transactions</h2><input id="r85TransactionSearch" placeholder="Search customer, order no., reference or amount..." oninput="r85ManageRender()" style="width:min(100%,540px);margin:8px 0"><div id="r85TransactionCount" class="muted"></div><div class="r85-scroll"><table><thead><tr><th>Date</th><th>Type</th><th>Order No.</th><th>Customer</th><th>Amount</th><th>Method</th><th>Reference</th><th>Status</th><th>Action</th></tr></thead><tbody id="r85TransactionBody"></tbody></table></div></div>
+ <dialog id="r85Correction" style="width:min(760px,90vw);max-height:90vh;border:1px solid #cde2e9;border-radius:16px;padding:24px;color:#073f66"><h2 id="r85CorrectionTitle"></h2><p>Review quantities, prices, payment details and notes. Saved closings require a separate closing adjustment.</p><div id="r85CorrectionFields"></div><p id="r85CorrectionError" style="color:#ae2525" role="alert"></p><div style="display:flex;gap:10px"><button id="r85EditSave" onclick="r85SaveCorrection('edit')">Save Changes</button><button id="r85EditCancel" onclick="r85SaveCorrection('cancel')" style="color:#a22">Cancel Transaction</button><button onclick="r85CloseCorrection()">Close</button></div><h3>Correction History</h3><div id="r85CorrectionHistory"></div></dialog>
+</section>
 <section id="settings" class="hidden">
   <div class="os-wrap">
     <div class="os-head">
@@ -1438,7 +1491,7 @@ async function loadBusinessInfoSettings(){
 }
 
 function showTab(tab){
-  const ids=['dashboard','neworder','orders','customers','credit','eod','settings','map'];
+  const ids=['dashboard','neworder','orders','customers','credit','eod','reports','settings','map'];
   document.querySelectorAll('#mainTabs .tab').forEach(b=>{
     b.classList.toggle('active', b.getAttribute('data-tab')===tab);
   });
@@ -1452,6 +1505,7 @@ function showTab(tab){
   if(tab==='customers' && typeof loadCustomerModule==='function') loadCustomerModule();
   if(tab==='credit' && typeof loadCreditModule==='function') loadCreditModule();
   if(tab==='eod' && typeof loadEOD==='function') loadEOD();
+  if(tab==='reports' && typeof loadOwnerReports==='function') loadOwnerReports();
   if(tab==='settings' && typeof loadOwnerSettings==='function'){ loadOwnerSettings(); loadBusinessInfoSettings(); showSettingsTab('products'); }
   window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -2562,6 +2616,7 @@ $("savePasswordBtn").onclick=async()=>{
 (function(){
   let creditAccounts=[];
   let selectedCreditId=null;
+  let collectionSaving=false;
 
   const esc = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
   const money = n => peso(Number(n||0));
@@ -2574,7 +2629,7 @@ $("savePasswordBtn").onclick=async()=>{
   async function loadCreditModule(){
     const [acctRes, collRes] = await Promise.all([
       db.from("credit_accounts").select("id,customer_id,notes,created_at,updated_at,customers(id,full_name,mobile,area,customer_type,active)").order("updated_at",{ascending:false}),
-      db.from("credit_collections").select("credit_account_id,amount,payment_method,collected_at").order("collected_at",{ascending:false})
+      db.from("credit_collections").select("credit_account_id,amount,payment_method,collected_at,cancelled_at,cancellation_reason,reference_number").order("collected_at",{ascending:false})
     ]);
     if(acctRes.error){ console.error("Credit accounts:",acctRes.error); return; }
 
@@ -2650,7 +2705,7 @@ $("savePasswordBtn").onclick=async()=>{
     $("creditDetail").classList.remove("hidden");
     const history=[
       ...(a.charges||[]).map(x=>({kind:"Credit",date:x.posted_at,amount:Number(x.amount||0),ref:x.orders?.order_no||"Credit sale"})),
-      ...(a.collections||[]).map(x=>({kind:"Collection",date:x.collected_at,amount:-Number(x.amount||0),ref:(x.payment_method||"").replace("_"," ")}))
+      ...(a.collections||[]).map(x=>({kind:x.cancelled_at?"Cancelled Collection":"Collection",date:x.collected_at,amount:-Number(x.amount||0),ref:[(x.payment_method||"").replace("_"," "),x.reference_number,x.cancellation_reason].filter(Boolean).join(" · ")}))
     ].sort((x,y)=>new Date(y.date)-new Date(x.date)).slice(0,12);
 
     $("creditDetail").innerHTML=`
@@ -2687,6 +2742,7 @@ $("savePasswordBtn").onclick=async()=>{
   }
 
   async function saveCollection(accountId){
+    if(collectionSaving)return;
     const a=creditAccounts.find(x=>x.id===accountId);
     if(!a)return;
     const amount=Number($("collectionAmount").value||0);
@@ -2698,6 +2754,8 @@ $("savePasswordBtn").onclick=async()=>{
     if(method!=="cash"&&!ref){message("collectionMsg","Enter the reference number for this payment method.","err");return;}
     if(!window.currentEmployeeId){message("collectionMsg","Your employee session could not be identified.","err");return;}
 
+    collectionSaving=true;const button=$("saveCollection");button.disabled=true;button.textContent="Saving…";
+    try{
     const {error}=await db.from("credit_collections").insert({
       credit_account_id:accountId,
       amount,
@@ -2711,6 +2769,8 @@ $("savePasswordBtn").onclick=async()=>{
     selectedCreditId=accountId;
     renderCreditList();
     renderCreditDetail(accountId);
+    }catch(e){message("collectionMsg",e.message||"Unable to confirm collection. Check Previous Collections before retrying.","err");}
+    finally{collectionSaving=false;if(button.isConnected){button.disabled=false;button.textContent="Record Collection";}}
   }
 
   $("creditSearch").oninput=renderCreditList;
@@ -2722,39 +2782,61 @@ $("savePasswordBtn").onclick=async()=>{
 
 
 <script id="eod-js">
-let eodSummary={};
+let eodSummary={},eodLoadSequence=0;
 function eodPeso(v){return '₱'+Number(v||0).toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2});}
 function eodEsc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
 function eodDatePH(){return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Manila',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());}
 function eodDayBounds(dateStr){return {start:`${dateStr}T00:00:00+08:00`,next:new Date(new Date(`${dateStr}T00:00:00+08:00`).getTime()+86400000).toISOString()};}
 function eodSetMsg(text,type){const el=$("eodCloseMsg");if(!el)return;el.className=type==='ok'?'eod-msg-ok':'eod-msg-err';el.textContent=text||'';}
 function eodRenderRecon(){const expected=Number(eodSummary.expected||0),actual=Number($("eodActualCash")?.value||0),diff=actual-expected;$("eodExpectedCashBox").textContent=eodPeso(expected);$("eodExpectedCash").textContent=eodPeso(expected);$("eodOverShort").textContent=eodPeso(diff);$("eodOverShort").style.color=diff===0?'#167a61':(diff>0?'#167a61':'#b33b3b');$("eodOverShortLabel").textContent=actual>0?(diff===0?'Balanced':(diff>0?'Cash over expected':'Cash short')):'Enter the actual cash counted.';}
+function eodLoadState(message,failed=false){
+  let banner=$('eodLoadStatus');
+  if(!banner){banner=document.createElement('div');banner.id='eodLoadStatus';banner.setAttribute('role','status');$('eodDate').closest('.eod-date-tools').parentElement.after(banner);}
+  banner.textContent=message;banner.style.cssText='margin:12px 0;padding:12px 16px;border-radius:10px;background:'+(failed?'#fff0ef':'#eaf6ff')+';color:'+(failed?'#a52c22':'#07547c');banner.hidden=!message;
+  $('eodCloseDay').disabled=true;
+  $('eodCollectionsBody').innerHTML='<tr><td colspan="7" class="eod-empty">'+eodEsc(message)+'</td></tr>';
+  ['eodTotalSales','eodTransactions','eodMoneyReceived','eodExpectedCash','eodCashSales','eodGcashSales','eodBankSales','eodOtherSales','eodCashCollections','eodGcashCollections','eodBankCollections','eodOtherCollections','eodMoneyReceived2','eodExpectedCashBox','eodOverShort'].forEach(id=>{if($(id))$(id).textContent='—'});
+  $('eodTransactionsBody').innerHTML='<tr><td colspan="7" class="eod-empty">'+eodEsc(message)+'</td></tr>';
+}
 async function loadEOD(){
+  const sequence=++eodLoadSequence;
+  eodSummary={};eodLoadState('Loading End of Day records…');
+  try{
   const input=$("eodDate");
   if(!input.value){
     const {data:businessDate}=await db.rpc("current_business_date");
     input.value=businessDate||eodDatePH();
   }
-  $("eodRefresh").onclick=loadEOD;$("eodActualCash").oninput=eodRenderRecon;
+  $("eodRefresh").onclick=loadEOD;input.onchange=loadEOD;$("eodActualCash").oninput=eodRenderRecon;
   $("eodCloseDay").onclick=closeEOD;
   const date=input.value;
   eodSetMsg('','ok');
   const {data:orders,error:oe}=await db.from('orders').select(`id,order_no,customer_id,channel,status,payment_status,payment_method,actual_amount,amount_collected,delivered_at,business_date,served_by_employee_id,delivery_personnel_id,customer:customers(full_name),served_by:employees!orders_served_by_employee_id_fkey(full_name),delivery_personnel:employees!orders_delivery_personnel_id_fkey(full_name),payments(amount,payment_method,reference_number,received_at),order_contributors(employee:employees(full_name,active))`).eq('status','delivered').eq('business_date',date).order('delivered_at',{ascending:false});
-  if(oe){console.error(oe);eodSetMsg(oe.message,'err');return;}
-  const {data:collections, error:ce}=await db.from('credit_collections').select('amount,payment_method,business_date').eq('business_date',date);
-  if(ce){console.error(ce);}
+  if(sequence!==eodLoadSequence)return;if(oe)throw new Error('Sales could not load: '+oe.message);
+  const {data:collections, error:ce}=await db.from('credit_collections').select('id,credit_account_id,amount,original_amount,cancelled_at,cancellation_reason,payment_method,business_date,collected_at,reference_number,notes,account:credit_accounts!credit_collections_credit_account_id_fkey(customer:customers!credit_accounts_customer_id_fkey(full_name)),received_by:employees!credit_collections_received_by_employee_id_fkey(full_name)').eq('business_date',date).order('collected_at',{ascending:false});
+  if(sequence!==eodLoadSequence)return;if(ce)throw new Error('Credit collections could not load: '+ce.message);
+  eodRenderCollections(collections||[]);
   let sales=0,money=0,cashSales=0,gcashSales=0,bankSales=0,otherSales=0,cashCol=0,gcashCol=0,bankCol=0,otherCol=0;
   (orders||[]).forEach(o=>{sales+=Number(o.actual_amount||0);(o.payments||[]).forEach(p=>{const a=Number(p.amount||0);money+=a;if(p.payment_method==='cash')cashSales+=a;else if(p.payment_method==='gcash')gcashSales+=a;else if(p.payment_method==='bank_transfer')bankSales+=a;else otherSales+=a;});});
   (collections||[]).forEach(c=>{const a=Number(c.amount||0);money+=a;if(c.payment_method==='cash')cashCol+=a;else if(c.payment_method==='gcash')gcashCol+=a;else if(c.payment_method==='bank_transfer')bankCol+=a;else otherCol+=a;});
-  const expected=cashSales+cashCol;eodSummary={sales,money,expected};
+  const expected=cashSales+cashCol;eodSummary={sales,money,expected,date,ready:true};
   $("eodTotalSales").textContent=eodPeso(sales);$("eodTransactions").textContent=(orders||[]).length;$("eodMoneyReceived").textContent=eodPeso(money);$("eodExpectedCash").textContent=eodPeso(expected);
   $("eodCashSales").textContent=eodPeso(cashSales);$("eodGcashSales").textContent=eodPeso(gcashSales);$("eodBankSales").textContent=eodPeso(bankSales);$("eodOtherSales").textContent=eodPeso(otherSales);$("eodCashCollections").textContent=eodPeso(cashCol);$("eodGcashCollections").textContent=eodPeso(gcashCol);$("eodBankCollections").textContent=eodPeso(bankCol);$("eodOtherCollections").textContent=eodPeso(otherCol);$("eodMoneyReceived2").textContent=eodPeso(money);
   eodRenderRecon();
   $("eodTransactionsBody").innerHTML=(orders||[]).length?(orders||[]).map(o=>{const paid=Number(o.amount_collected||0),team=[];(o.order_contributors||[]).forEach(x=>{const n=x.employee?.full_name;if(n&&!team.includes(n))team.push(n)});if(!team.length&&o.served_by?.full_name)team.push(o.served_by.full_name);if(!team.length&&o.delivery_personnel?.full_name)team.push(o.delivery_personnel.full_name);const customer=o.channel==='walk_in'?'Walk-In':(o.customer?.full_name||'—');const method=o.payment_status==='credit'?'Credit':(o.payment_method||'—').replace('_',' ');const status=o.payment_status==='credit'?'CREDIT':'PAID';return `<tr><td><strong>${eodEsc(o.order_no)}</strong></td><td>${eodEsc(customer)}</td><td>${eodPeso(o.actual_amount)}</td><td>${eodPeso(paid)}</td><td>${eodEsc(method)}</td><td><span class="eod-status ${status.toLowerCase()}">${status}</span></td><td>${eodEsc(team.join(', ')||'—')}</td></tr>`}).join(''):`<tr><td colspan="7" class="eod-empty">No completed sales for this date.</td></tr>`;
-  await loadEODHistory();
+  $('eodLoadStatus').hidden=true;$('eodCloseDay').disabled=false;
+  }catch(error){if(sequence!==eodLoadSequence)return;eodSummary={};eodLoadState('Unable to load End of Day. '+String(error.message||error)+' Click Refresh to retry.',true);}
+
 }
-async function loadEODHistory(){const {data,error}=await db.from('eod_closings').select('business_date,closed_at,expected_cash,actual_cash,over_short,status,closed_by:employees!eod_closings_closed_by_employee_id_fkey(full_name)').order('business_date',{ascending:false}).limit(20);if(error){console.error(error);$("eodHistoryBody").innerHTML=`<tr><td colspan="7" class="eod-empty">Unable to load closing history.</td></tr>`;return;}$("eodHistoryBody").innerHTML=(data||[]).length?data.map(x=>`<tr><td>${eodEsc(x.business_date)}</td><td>${new Date(x.closed_at).toLocaleString('en-PH',{timeZone:'Asia/Manila'})}</td><td>${eodEsc(x.closed_by?.full_name||'—')}</td><td>${eodPeso(x.expected_cash)}</td><td>${eodPeso(x.actual_cash)}</td><td style="color:${Number(x.over_short)<0?'#b33b3b':'#167a61'};font-weight:900">${eodPeso(x.over_short)}</td><td class="eod-status paid">${eodEsc(String(x.status||'closed').toUpperCase())}</td></tr>`).join(''):`<tr><td colspan="7" class="eod-empty">No closing records yet.</td></tr>`;}
-async function closeEOD(){const date=$("eodDate").value,actual=Number($("eodActualCash").value||0),expected=Number(eodSummary.expected||0),diff=actual-expected,notes=($("eodClosingNotes").value||'').trim()||null;if(!date){eodSetMsg('Select the business date.','err');return}if(actual<0){eodSetMsg('Actual cash cannot be negative.','err');return}if(Math.abs(diff)>0.009&&!notes){eodSetMsg('Please enter a closing note explaining the overage or shortage.','err');return}if(!window.currentEmployeeId){eodSetMsg('Your employee session could not be identified.','err');return}const {data:existing}=await db.from('eod_closings').select('id').eq('business_date',date).maybeSingle();if(existing){eodSetMsg('This business date has already been closed.','err');return}const {error}=await db.from('eod_closings').insert({business_date:date,total_sales:Number(eodSummary.sales||0),transaction_count:Number($("eodTransactions").textContent||0),total_money_received:Number(eodSummary.money||0),expected_cash:expected,actual_cash:actual,over_short:diff,closing_notes:notes,closed_by_employee_id:window.currentEmployeeId});if(error){eodSetMsg(error.message,'err');return}eodSetMsg('Day closed successfully. Closing record saved.','ok');await loadEODHistory();}
+function eodRenderCollections(collections){
+  const methodNames={cash:'Cash',gcash:'GCash',bank_transfer:'Bank Transfer',other:'Other'};
+  const rows=collections.map(c=>{
+    const date=c.collected_at?new Date(c.collected_at).toLocaleString('en-PH',{timeZone:'Asia/Manila',month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',second:'2-digit'}):'—';
+    return '<tr data-collection-id="'+eodEsc(c.id)+'"><td>'+eodEsc(date)+'</td><td><strong>'+eodEsc(c.account?.customer?.full_name||'Customer unavailable')+'</strong></td><td>'+eodPeso(c.amount)+'</td><td>'+eodEsc(methodNames[c.payment_method]||c.payment_method||'—')+'</td><td>'+eodEsc(c.reference_number||'—')+'</td><td>'+eodEsc(c.received_by?.full_name||'Not recorded')+'</td><td>'+eodEsc(c.cancelled_at?'Cancelled: '+(c.cancellation_reason||'')+' (Original '+eodPeso(c.original_amount)+')':c.notes||'—')+'</td></tr>';
+  }).join('');
+  $('eodCollectionsBody').innerHTML=rows?rows+'<tr><td colspan="2"><strong>Total Collections</strong></td><td><strong>'+eodPeso(collections.reduce((sum,c)=>sum+Number(c.amount||0),0))+'</strong></td><td colspan="4"></td></tr>':'<tr><td colspan="7" class="eod-empty">No collections recorded for this business date.</td></tr>';
+}
+async function closeEOD(){if(!eodSummary.ready||eodSummary.date!==$('eodDate').value){eodSetMsg('Refresh and load this business date successfully before closing.','err');return}const date=$("eodDate").value,actual=Number($("eodActualCash").value||0),expected=Number(eodSummary.expected||0),diff=actual-expected,notes=($("eodClosingNotes").value||'').trim()||null;if(!date){eodSetMsg('Select the business date.','err');return}if(actual<0){eodSetMsg('Actual cash cannot be negative.','err');return}if(Math.abs(diff)>0.009&&!notes){eodSetMsg('Please enter a closing note explaining the overage or shortage.','err');return}if(!window.currentEmployeeId){eodSetMsg('Your employee session could not be identified.','err');return}const {data:existing}=await db.from('eod_closings').select('id').eq('business_date',date).maybeSingle();if(existing){eodSetMsg('This business date has already been closed.','err');return}const {error}=await db.from('eod_closings').insert({business_date:date,total_sales:Number(eodSummary.sales||0),transaction_count:Number($("eodTransactions").textContent||0),total_money_received:Number(eodSummary.money||0),expected_cash:expected,actual_cash:actual,over_short:diff,closing_notes:notes,closed_by_employee_id:window.currentEmployeeId});if(error){eodSetMsg(error.message,'err');return}eodSetMsg('Day closed successfully. Closing record saved.','ok');}
 window.loadEOD=loadEOD;
 
 async function loadContainerTypes(){
@@ -2904,5 +2986,98 @@ function escAttr(v){return esc(v).replace(/`/g,'&#96;');}
     </div>
   </div>
 </div>
+<script id="v85-owner-reports">
+// V86: Owner corrections use authenticated, audited database transactions.
+const r85Names=['Products','Inventory / Containers','Personnel','Sales & Collections','Areas & Customers','Delivery Performance','Audit & Discrepancies'];
+let r85Tab=0,r85Rows=[],r85Headers=[],r85Orders=[],r85Items=[],r85Payments=[],r85Collections=[],r85Employees=[];
+const r85Money=x=>peso(Number(x||0));
+const r85N=x=>Number(x||0);
+function r85Label(value){const text=String(value||'').replace(/_/g,' ').trim();const known={cash:'Cash',gcash:'GCash','bank transfer':'Bank Transfer',credit:'Credit'};return known[text.toLowerCase()]||text.replace(/\b[a-z]/g,c=>c.toUpperCase());}
+const r85Day=d=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Manila',year:'numeric',month:'2-digit',day:'2-digit'}).format(d);
+function r85SetPreset(v){const now=new Date(),a=new Date(now),b=new Date(now);if(v==='custom')return;if(v==='yesterday'){a.setDate(a.getDate()-1);b.setDate(b.getDate()-1)}if(v==='week'){a.setDate(a.getDate()-((a.getDay()+6)%7))}if(v==='month')a.setDate(1);if(v==='last7')a.setDate(a.getDate()-6);if(v==='last30')a.setDate(a.getDate()-29);$('r85From').value=r85Day(a);$('r85To').value=r85Day(b)}
+function r85Warn(msg){$('r85Message').textContent=msg;$('r85Message').classList.toggle('hidden',!msg)}
+function r85Display(headers,rows,kpis=[],note=''){r85ManageRender();r85Headers=headers;r85Rows=rows;r85Warn(note);$('r85Kpis').innerHTML=kpis.map(([a,b])=>`<div><span class="muted">${esc(a)}</span><strong>${esc(String(b))}</strong></div>`).join('');$('r85Table').innerHTML=`<table><thead><tr>${headers.map(x=>`<th>${esc(x)}</th>`).join('')}</tr></thead><tbody>${rows.length?rows.map(r=>`<tr>${r.map(v=>`<td>${esc(String(v??'—'))}</td>`).join('')}</tr>`).join(''):`<tr><td colspan="${headers.length}">No matching records found.</td></tr>`}</tbody></table>`}
+function r85SelectTab(n){r85Tab=n;document.querySelectorAll('#r85Tabs button').forEach((b,i)=>b.classList.toggle('active',i===n));r85Render()}
+function r85OrderDate(o){return String(o.business_date||o.delivered_at||o.created_at||'').slice(0,10)}
+function r85Completed(o){return String(o.status||'').toLowerCase()==='delivered'||String(o.channel||'').toLowerCase().includes('walk')&&['completed','paid','delivered'].includes(String(o.status||'').toLowerCase())}
+function r85PersonnelRows(done, roster){
+  const people=new Map();
+  const add=(id,name)=>{const key=id||'name:'+name;if(!people.has(key))people.set(key,{name:name||'Unnamed Personnel',orders:new Map()});return people.get(key)};
+  roster.forEach(e=>add(e.id,e.full_name));
+  done.forEach(o=>{
+    const team=new Map();
+    const member=(id,name)=>{if(id||name){const key=id||'name:'+name;team.set(key,add(id,name||people.get(key)?.name))}};
+    (o.order_contributors||[]).forEach(c=>member(c.employee_id||c.employee?.id,c.employee?.full_name));
+    member(o.served_by_employee_id,o.served_by?.full_name);
+    member(o.delivery_personnel_id,o.delivery_personnel?.full_name);
+    if(!team.size)team.set('unassigned',add('unassigned','Unassigned'));
+    team.forEach(person=>person.orders.set(o.id,o));
+  });
+  return [...people.values()].sort((a,b)=>a.name.localeCompare(b.name)).map(person=>{
+    const orders=[...person.orders.values()];
+    const sums=['North','South','Central','Walk-In'].map(area=>orders.filter(o=>area==='Walk-In'?String(o.channel||'').includes('walk'):!String(o.channel||'').includes('walk')&&o.area===area).reduce((sum,o)=>sum+r85N(o.actual_amount),0));
+    return [person.name,...sums.map(r85Money),r85Money(orders.reduce((sum,o)=>sum+r85N(o.actual_amount),0)),orders.reduce((sum,o)=>sum+r85N(o.actual_qty),0)];
+  });
+}
+function r85Render(){const orders=r85Orders,done=orders.filter(r85Completed),items=r85Items.filter(x=>done.some(o=>o.id===x.order_id)),group=(arr,key,calc)=>{const m=new Map();arr.forEach(x=>{const k=key(x);if(!m.has(k))m.set(k,[]);m.get(k).push(x)});return [...m].map(([k,v])=>calc(k,v))};const dateNote='Date filters use recorded transaction dates. Figures are read-only; verify against EOD before accounting use.';
+if(r85Tab===0){const rows=group(items,x=>x.product?.name||x.product_name||'Unknown product',(k,v)=>[k,v.reduce((a,x)=>a+r85N(x.delivered_qty??x.ordered_qty),0),r85Money(v.reduce((a,x)=>a+r85N(x.line_total??(r85N(x.delivered_qty)*r85N(x.unit_price))),0))]);return r85Display(['Product','Actual Qty / Units','Recorded Line Total'],rows,[['Products',rows.length]],dateNote+' Product quantities may include liters, days, or containers; do not combine these units.');}
+if(r85Tab===1){const rows=group(done.filter(o=>o.channel!=='walk_in'),o=>[o.customer?.full_name||'Unknown',o.area||'—'].join('|'),(k,v)=>[...k.split('|'),v.reduce((a,o)=>a+r85N(o.actual_qty),0),v.reduce((a,o)=>a+r85N(o.containers_returned),0),'Not verified']);return r85Display(['Customer','Area','Delivered (range)','Returned (range)','Outstanding (lifetime)'],rows,[], 'IMPORTANT: Outstanding customer containers cannot be calculated from date-range deliveries minus returns. Opening balances, sold containers, and all historical movements must be reconciled first. This report deliberately does NOT invent outstanding balances.');}
+if(r85Tab===2){return r85Display(['Personnel','North','South','Central','Walk-In','Total Sales','Total TC'],r85PersonnelRows(done,r85Employees),[], 'TC = Total Containers. Total Sales and Total TC include completed walk-in and delivery orders each employee helped handle. Shared orders count once for each contributor, so personnel rows should not be added together for store totals.');}
+if(r85Tab===3){const total=done.reduce((a,o)=>a+r85N(o.actual_amount),0);const rows=group(done,o=>String(o.payment_status||'').toLowerCase()==='credit'?'Credit Generated':(o.payment_method||'Payment method missing'),(k,v)=>[r85Label(k),v.length,r85Money(v.reduce((a,o)=>a+r85N(o.actual_amount),0)),r85Money(v.reduce((a,o)=>a+r85N(o.amount_collected),0))]);const credit=done.filter(o=>o.payment_status==='credit').reduce((a,o)=>a+r85N(o.actual_amount),0);const collected=r85Collections.reduce((a,c)=>a+r85N(c.amount),0);const cashCollections=r85Collections.filter(c=>c.payment_method==='cash').reduce((a,c)=>a+r85N(c.amount),0);const cashPayments=r85Payments.filter(p=>p.payment_method==='cash').reduce((a,p)=>a+r85N(p.amount),0);rows.push(['Prior-Credit Collections (Separate)',r85Collections.length,'—',r85Money(collected)]);return r85Display(['Payment Category','Transactions','Completed Sales','Order Payments / Collections'],rows,[['Completed Sales',r85Money(total)],['Credit Sales Generated',r85Money(credit)],['Prior-Credit Collections',r85Money(collected)],['Cash Received (Payments + Collections)',r85Money(cashPayments+cashCollections)]], '');}
+if(r85Tab===4){const rows=group(done,o=>String(o.channel||'').includes('walk')?'Walk-In':o.area||'Unassigned',(k,v)=>[k,v.length,r85Money(v.reduce((a,o)=>a+r85N(o.actual_amount),0)),v.reduce((a,o)=>a+r85N(o.actual_qty),0),new Set(v.map(o=>o.customer_id).filter(Boolean)).size]);return r85Display(['Area','Transactions','Sales','Actual Containers','Customers'],rows,[],dateNote+' Customer inactivity and customer-type splits require historical customer data.');}
+if(r85Tab===5){const rows=group(orders,o=>o.status||'Unknown',(k,v)=>[r85Label(k),v.length,v.reduce((a,o)=>a+r85N(o.actual_qty),0),v.reduce((a,o)=>a+r85N(o.containers_returned),0),r85Money(v.reduce((a,o)=>a+r85N(o.actual_amount),0))]);return r85Display(['Status','Orders','Actual Qty','Containers Returned','Recorded Amount'],rows,[],dateNote+' Detailed ordered-versus-delivered variance requires the complete order-item records.');}
+return r85Display(['Event','Count','Status'],[['Void / cancellation audit','—','Requires verified audit log access'],['Price overrides','—','Requires verified change history'],['EOD over / short','—','Requires verified EOD records']],[], 'Audit figures are intentionally not invented. This tab requires a verified read-only audit source before it can display transaction-level changes.');}
+async function r85ReadAll(table,select,filters){let out=[];for(let start=0;;start+=500){let q=db.from(table).select(select).order("id").range(start,start+499);if(filters)q=filters(q);const {data,error}=await q;if(error)throw error;out.push(...(data||[]));if(!data||data.length<500)break;}return out}
+async function loadOwnerReports(){if(typeof currentEmployeeRole==='undefined'||currentEmployeeRole!=='owner'){r85Warn('Owner access required.');$('r85Table').innerHTML='';return}const from=$('r85From').value,to=$('r85To').value;if(!from||!to||from>to){r85Warn('Choose a valid date range.');return}r85Warn('Loading transaction records…');try{const all=await r85ReadAll('orders','id,order_no,channel,status,payment_status,payment_method,delivery_personnel_id,served_by_employee_id,delivered_at,created_at,updated_at,notes,business_date,area,customer_id,actual_amount,amount_collected,actual_qty,containers_returned,customer:customers(full_name),delivery_personnel:employees!orders_delivery_personnel_id_fkey(full_name),served_by:employees!orders_served_by_employee_id_fkey(full_name),order_contributors(employee_id,contribution_type,employee:employees(id,full_name))');r85Employees=await r85ReadAll('employees','id,full_name');r85Orders=all.filter(o=>{const d=r85OrderDate(o);return d>=from&&d<=to});const ids=new Set(r85Orders.map(o=>o.id));const raw=await r85ReadAll('order_items','id,order_id,ordered_qty,delivered_qty,unit_price,line_total,product:products(name)');r85Items=raw.filter(x=>ids.has(x.order_id));const payments=await r85ReadAll('payments','id,order_id,amount,payment_method,reference_number,received_at');r85Payments=payments.filter(p=>ids.has(p.order_id)&&r85Orders.some(o=>o.id===p.order_id&&r85Completed(o)));const collections=await r85ReadAll('credit_collections','id,credit_account_id,amount,original_amount,cancelled_at,cancellation_reason,updated_at,notes,reference_number,payment_method,business_date,collected_at,account:credit_accounts(customer:customers(full_name))');r85AllCollections=collections.filter(c=>{const d=String(c.business_date||c.collected_at||'').slice(0,10);return d>=from&&d<=to});r85Collections=r85AllCollections.filter(c=>!c.cancelled_at);r85Audit=await r85ReadAll('audit_logs','id,category,action,order_id,actor_employee_id,before_data,after_data,detail,created_at');r85Render()}catch(e){r85Orders=[];r85Items=[];r85Payments=[];r85Collections=[];r85AllCollections=[];r85Audit=[];r85Display(['Report status'],[['Unable to load report records.']],[], 'Database read failed: '+String(e.message||e)+'. No records were modified.')}}
+function exportOwnerReport(){if(!r85Headers.length){alert('Load a report first.');return}const quote=x=>'"'+String(x??'').replace(/"/g,'""')+'"';const csv='\uFEFF'+[r85Headers,...r85Rows].map(row=>row.map(quote).join(',')).join('\r\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='Solavida_V85_'+r85Names[r85Tab].replace(/[^a-z0-9]/gi,'_')+'_'+$('r85From').value+'_'+$('r85To').value+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+let r85AllCollections=[],r85Audit=[],r85Editing=null,r85Saving=false;
+function r85ShortOrderNo(serial){
+ const raw=String(serial||'');
+ const match=raw.match(/^SV-\d{8}-(\d+)$/i);
+ return match?'SV-'+match[1]:raw;
+}
+function r85ManageRender(){
+ const host=$('r85Transactions');host.hidden=r85Tab!==3;$('reports').classList.toggle('r85-sales-layout',r85Tab===3);if(r85Tab!==3)return;
+ const q=($('r85TransactionSearch')?.value||'').toLowerCase().trim();
+ // Display-only labels; real database IDs remain untouched. Assign collection labels
+ // consistently using the full loaded collection set, including cancelled records.
+ const orderedCollections=[...r85AllCollections].sort((a,b)=>String(a.collected_at||a.created_at||a.business_date||'').localeCompare(String(b.collected_at||b.created_at||b.business_date||''))||String(a.id).localeCompare(String(b.id)));
+ const collectionLabels=new Map(orderedCollections.map((c,i)=>[c.id,'COL-'+String(i+1).padStart(4,'0')]));
+ const entries=[...r85Orders.map(o=>({kind:'order',id:o.id,date:r85OrderDate(o),serial:o.order_no,displayNo:r85ShortOrderNo(o.order_no),name:o.channel==='walk_in'?'Walk-In':o.customer?.full_name||'Customer',amount:r85N(o.actual_amount),method:o.payment_status==='credit'?'Credit':r85Label(o.payment_method||'Unspecified'),ref:r85Payments.filter(p=>p.order_id===o.id).map(p=>p.reference_number).filter(Boolean).join(', '),status:r85Label(o.status),cancelled:o.status==='cancelled'})),...r85AllCollections.map(c=>({kind:'collection',id:c.id,date:String(c.business_date||c.collected_at).slice(0,10),serial:'COL-'+c.id,displayNo:collectionLabels.get(c.id),name:c.account?.customer?.full_name||'Customer',amount:r85N(c.amount),method:r85Label(c.payment_method),ref:c.reference_number||'',status:c.cancelled_at?'Cancelled':(c.reference_number&&r85AllCollections.filter(z=>!z.cancelled_at&&z.payment_method===c.payment_method&&String(z.reference_number||'').trim().toLowerCase()===c.reference_number.trim().toLowerCase()).length>1?'Repeated Reference — Review':'Collected'),cancelled:!!c.cancelled_at}))].sort((a,b)=>b.date.localeCompare(a.date)||a.serial.localeCompare(b.serial));
+ const filtered=entries.filter(x=>[x.serial,x.displayNo,x.name,x.ref,x.status,x.kind,String(x.amount)].join(' ').toLowerCase().includes(q));
+ $('r85TransactionCount').textContent=filtered.length+' of '+entries.length+' records · '+r85Orders.length+' sales orders · '+r85AllCollections.length+' collections (including cancelled)';
+ const statusStyle=x=>x.cancelled?'r87-cancelled':x.status.includes('Repeated Reference')?'r87-warning':x.status==='Collected'?'r87-collected':x.status==='Delivered'?'r87-delivered':'r87-neutral';
+ $('r85TransactionBody').innerHTML=filtered.map(x=>`<tr><td>${esc(x.date)}</td><td><span class="r87-kind ${x.kind==='order'?'r87-sale':'r87-collection'}">${x.kind==='order'?'Sale':'Collection'}</span></td><td class="r87-order-no" title="${esc(x.serial)}">${esc(x.displayNo)}</td><td class="r87-customer"><strong>${esc(x.name)}</strong></td><td>${r85Money(x.amount)}</td><td>${esc(x.method)}</td><td class="r87-reference" title="${esc(x.ref||'')}">${esc(x.ref||'—')}</td><td><span class="r87-status ${statusStyle(x)}">${esc(x.status)}</span></td><td><button class="r87-action" onclick="r85OpenCorrection('${x.kind}','${x.id}')">${x.cancelled?'View':'Edit / Cancel'}</button></td></tr>`).join('')||'<tr><td colspan="9">No matching transactions.</td></tr>';
+}
+function r85CloseCorrection(){if(!r85Saving)$('r85Correction').close();}
+function r85OpenCorrection(kind,id){
+ if(window.currentEmployeeRole!=='owner')return;
+ const record=(kind==='order'?r85Orders:r85AllCollections).find(x=>x.id===id);if(!record)return;
+ r85Editing={kind,id,record};const cancelled=kind==='order'?record.status==='cancelled':!!record.cancelled_at;
+ const isCredit=kind==='order'&&record.payment_status==='credit';const payment=r85Payments.find(x=>x.order_id===id);
+ $('r85CorrectionTitle').textContent=(kind==='order'?record.order_no:'Collection: '+(record.account?.customer?.full_name||id));
+ const methods=['cash','gcash','bank_transfer','other'];
+ $('r85CorrectionFields').innerHTML=(kind==='collection'?`<label>Collection Amount<input id="r85EditAmount" type="number" min="0.01" step="0.01" value="${r85N(record.amount)}"></label>`:`<table><thead><tr><th>Product</th><th>Actual Qty</th><th>Unit Price</th></tr></thead><tbody>${r85Items.filter(x=>x.order_id===id).map(x=>`<tr data-edit-item="${x.id}"><td>${esc(x.product?.name||'Product')}</td><td><input data-qty type="number" min="0" step="0.01" value="${r85N(x.delivered_qty??x.ordered_qty)}"></td><td><input data-price type="number" min="0" step="0.01" value="${r85N(x.unit_price)}"></td></tr>`).join('')}</tbody></table>`)+
+ (isCredit?'<p>Credit sale: corrections update the customer’s credit charge.</p>':`<label>Payment Method<select id="r85EditMethod">${methods.map(m=>`<option value="${m}" ${(record.payment_method||payment?.payment_method)===m?'selected':''}>${r85Label(m)}</option>`).join('')}</select></label><label>Reference Number<input id="r85EditRef" value="${esc(kind==='collection'?record.reference_number||'':payment?.reference_number||'')}"></label>`)+`<label>Notes<textarea id="r85EditNotes">${esc(record.notes||'')}</textarea></label><label>Reason for Correction (Required)<textarea id="r85EditReason" placeholder="Explain what was wrong and why it needs correcting"></textarea></label>`;
+ const history=r85Audit.filter(a=>a.order_id===id||a.detail?.transaction_id===id);
+ $('r85CorrectionHistory').innerHTML=(cancelled&&kind==='collection'?`<p><strong>Cancelled original amount: ${r85Money(record.original_amount)}</strong><br>${esc(record.cancellation_reason||'')}</p>`:'')+history.map(a=>`<details><summary>${esc(r85Label(a.action))} · ${esc(new Date(a.created_at).toLocaleString('en-PH',{timeZone:'Asia/Manila'}))}</summary><p>${esc(a.detail?.reason||'')}</p><p>Amount: ${r85Money(a.before_data?.order?.actual_amount??a.before_data?.amount)} → ${r85Money(a.after_data?.order?.actual_amount??a.after_data?.amount)}</p><p>Recorded By: ${esc(r85Employees.find(e=>e.id===a.actor_employee_id)?.full_name||"Assisted Correction")}</p></details>`).join('');
+ $('r85EditSave').hidden=cancelled;$('r85EditCancel').hidden=cancelled;$('r85CorrectionError').textContent='';
+ $('r85CorrectionFields').querySelectorAll('input,select,textarea').forEach(x=>x.disabled=cancelled);
+ $('r85Correction').showModal();
+}
+async function r85SaveCorrection(action){
+ if(r85Saving||!r85Editing)return;const {kind,id,record}=r85Editing;const reason=$('r85EditReason').value.trim();
+ if(reason.length<3){$('r85CorrectionError').textContent='Enter the reason for this correction.';return;}
+ const patch={notes:$('r85EditNotes').value,payment_method:$('r85EditMethod')?.value||null,reference_number:$('r85EditRef')?.value||null};
+ if(kind==='collection')patch.amount=Number($('r85EditAmount').value);else patch.items=[...$('r85CorrectionFields').querySelectorAll('[data-edit-item]')].map(row=>({id:row.dataset.editItem,qty:Number(row.querySelector('[data-qty]').value),price:Number(row.querySelector('[data-price]').value)}));
+ if(!confirm((action==='cancel'?'Cancel this transaction and reverse its recorded financial effect?':'Save these corrections?')+'\n'+$('r85CorrectionTitle').textContent+'\nReason: '+reason+'\nThis change will be recorded in the audit log.'))return;
+ r85Saving=true;$('r85EditSave').disabled=true;$('r85EditCancel').disabled=true;
+ try{const {error}=await db.rpc('owner_correct_transaction',{p_kind:kind,p_id:id,p_action:action,p_expected:record.updated_at,p_patch:patch,p_reason:reason});if(error)throw error;$('r85Correction').close();await loadOwnerReports();}
+ catch(e){$('r85CorrectionError').textContent=e.message||String(e);}
+ finally{r85Saving=false;$('r85EditSave').disabled=false;$('r85EditCancel').disabled=false;}
+}
+
+(function initV85(){const el=document.getElementById('r85Tabs');if(!el)return;el.innerHTML=r85Names.map((n,i)=>`<button onclick="r85SelectTab(${i})" class="${i===0?'active':''}">${esc(n)}</button>`).join('');r85SetPreset('month');const nav=document.querySelector('[data-tab="reports"]');if(nav)nav.style.display='none';const observer=new MutationObserver(()=>{if(nav)nav.style.display=typeof currentEmployeeRole!=='undefined'&&currentEmployeeRole==='owner'?'':'none'});observer.observe(document.getElementById('app'),{attributes:true,attributeFilter:['class']});})();
+</script>
 </body>
 </html>
