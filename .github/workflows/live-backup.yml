@@ -1,0 +1,31 @@
+name: Encrypted Live backup and recovery check
+on:
+  push:
+    branches: [ops/verified-live-backup]
+    paths:
+      - '.github/workflows/live-backup.yml'
+      - 'scripts/backup-live.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: solavida-live-backup
+  cancel-in-progress: false
+jobs:
+  backup:
+    if: github.repository == 'Solavida26/Solavida-POS' && github.ref == 'refs/heads/ops/verified-live-backup'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read-only backup and isolated recovery test
+        env:
+          SOLAVIDA_DB_PASSWORD: ${{ secrets.SOLAVIDA_DB_PASSWORD }}
+        run: python3 scripts/backup-live.py
+      - name: Save encrypted backup only
+        uses: actions/upload-artifact@v4
+        with:
+          name: solavida-encrypted-pre-v90-${{ github.run_id }}
+          path: backup-output/
+          if-no-files-found: error
+          retention-days: 30
