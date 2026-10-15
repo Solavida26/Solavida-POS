@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Solavida POS — V88 Stable</title>
+<title>Solavida POS — V90 Delivery Routes</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--bg:#f5f8f7;--card:#fff;--text:#18322d;--muted:#71807c;--line:#dce7e3;--primary:#087f69;--soft:#e8f3f0}
@@ -853,6 +853,10 @@ main{
 #reports #r85Transactions{margin-top:12px!important}
 #reports #r85Transactions h2{margin:10px 0 8px}
 </style>
+<style id="v89-styles">
+.r89-wrap{font-size:14px}.r89-head h2{margin:12px 0 4px}.r89-head p{margin:0 0 14px;color:#5c7180}.r89-kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-bottom:15px}.r89-kpis>div{background:#f1faf7;border:1px solid #d2e8e1;padding:13px;border-radius:12px}.r89-kpis span{display:block;font-size:12px;color:#496879}.r89-kpis strong{display:block;font-size:21px;color:#0e4467;margin-top:6px}.r89-filter{display:grid;grid-template-columns:1fr 1.7fr 1fr auto;gap:12px;align-items:end;background:#f6fbff;border:1px solid #dfebef;border-radius:12px;padding:14px;margin:10px 0 16px}.r89-filter label{font-weight:700}.r89-filter input,.r89-filter select{margin:5px 0 0}.r89-filter button{background:#e7f0f4;color:#145b75}.r89-scroll{overflow-x:auto}.r89-table{width:100%;border-collapse:collapse;background:white}.r89-table td,.r89-table th{border:1px solid #dce9eb;padding:11px;text-align:left}.r89-table thead,.r89-table tfoot{background:#e4f3ed}.r89-expand{background:none;border:0;padding:3px;color:#0c4f75;text-align:left;font-weight:800}.r89-details>td{background:#f6fbf9;padding:14px}.r89-details table{width:100%;border-collapse:collapse;margin-top:8px}.r89-details table td,.r89-details table th{padding:8px;border:1px solid #d7e8e1}.r89-notice,.r89-footnote{color:#81611e;background:#fff8e8;padding:9px;margin:8px 0;border-radius:8px}.r89-footnote{margin-top:12px}.eod-date-tools{flex-wrap:wrap}@media(max-width:1100px){.r89-kpis{grid-template-columns:repeat(3,1fr)}.r89-filter{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:650px){.r89-kpis,.r89-filter{grid-template-columns:1fr}}
+</style>
+<link rel="stylesheet" href="delivery-routes.css">
 </head>
 <body>
 
@@ -1245,7 +1249,7 @@ main{
 <section id="eod" class="hidden eod-screen">
   <div class="eod-head">
     <div><h1>End of Day Closing</h1><div class="muted">Reconcile the selected business date's sales, collections and physical cash before closing.</div></div>
-    <div class="eod-date-tools"><input id="eodDate" type="date"><button id="eodRefresh" class="primary">↻ Refresh</button></div>
+    <div class="eod-date-tools"><input id="eodDate" type="date"><button id="eodRefresh" class="primary">↻ Refresh</button><button type="button" onclick="r89EodExport()">↓ Excel (CSV)</button><button type="button" onclick="r89EodPrint()">▣ Print EOD</button></div>
   </div>
   <div class="eod-kpis">
     <div class="eod-kpi"><span>Total Sales</span><strong id="eodTotalSales">₱0.00</strong></div>
@@ -1293,7 +1297,7 @@ main{
 </section>
 
 <section id="reports" class="hidden">
- <div class="r85-head"><div><h1>Owner's Reports <small style="font-size:12px;color:#71807c">V88 test build</small></h1><div class="muted">Review sales and collections. Owner corrections require a reason and are recorded in the audit log.</div></div><div class="r85-actions"><button onclick="loadOwnerReports()">↻ Refresh</button><button onclick="exportOwnerReport()">Export CSV (Excel)</button><button onclick="window.print()">Print</button></div></div>
+ <div class="r85-head"><div><h1>Owner's Reports <small style="font-size:12px;color:#71807c">V90 Delivery Routes</small></h1><div class="muted">Review sales and collections. Owner corrections require a reason and are recorded in the audit log.</div></div><div class="r85-actions"><button onclick="loadOwnerReports()">↻ Refresh</button><button onclick="exportOwnerReport()">Export CSV (Excel)</button><button onclick="window.print()">Print</button></div></div>
  <div class="r85-filters"><label>From <input type="date" id="r85From"></label><label>To <input type="date" id="r85To"></label><select id="r85Preset" onchange="r85SetPreset(this.value)"><option value="month">This Month</option><option value="today">Today</option><option value="yesterday">Yesterday</option><option value="week">This Week</option><option value="last7">Last 7 Days</option><option value="last30">Last 30 Days</option><option value="custom">Custom Dates</option></select><button class="primary" onclick="loadOwnerReports()">Search</button></div>
  <div class="r85-tabs" id="r85Tabs"></div><div id="r85Message" class="r85-note">Choose dates and refresh to view reports.</div><div class="r85-summary"><div id="r85Kpis" class="r85-kpis"></div><div id="r85Table" class="r85-scroll"></div></div>
  <div id="r85Transactions" hidden style="margin-top:20px"><h2>All Transactions</h2><input id="r85TransactionSearch" placeholder="Search customer, order no., reference or amount..." oninput="r85ManageRender()" style="width:min(100%,540px);margin:8px 0"><div id="r85TransactionCount" class="muted"></div><div class="r85-scroll"><table><thead><tr><th>Date</th><th>Type</th><th>Order No.</th><th>Customer</th><th>Amount</th><th>Method</th><th>Reference</th><th>Status</th><th>Action</th></tr></thead><tbody id="r85TransactionBody"></tbody></table></div></div>
@@ -2608,6 +2612,7 @@ $("savePasswordBtn").onclick=async()=>{
 
   // Expose for the existing tab switcher without changing the rest of the POS.
   window.loadSolavidaOrders=loadOrders;
+  window.openDeliveryRouteOrder=async function(id){showTab('orders');await loadOrders();const o=allOrders.find(x=>x.id===id);if(!o){alert('Order not found. Refresh Orders.');return;}selectOrder(id);if(o.status==='on_the_way')showCompleteBox(o);};
   window.renderSolavidaOrders=renderOrders;
 })();
 </script>
@@ -2819,7 +2824,7 @@ async function loadEOD(){
   let sales=0,money=0,cashSales=0,gcashSales=0,bankSales=0,otherSales=0,cashCol=0,gcashCol=0,bankCol=0,otherCol=0;
   (orders||[]).forEach(o=>{sales+=Number(o.actual_amount||0);(o.payments||[]).forEach(p=>{const a=Number(p.amount||0);money+=a;if(p.payment_method==='cash')cashSales+=a;else if(p.payment_method==='gcash')gcashSales+=a;else if(p.payment_method==='bank_transfer')bankSales+=a;else otherSales+=a;});});
   (collections||[]).forEach(c=>{const a=Number(c.amount||0);money+=a;if(c.payment_method==='cash')cashCol+=a;else if(c.payment_method==='gcash')gcashCol+=a;else if(c.payment_method==='bank_transfer')bankCol+=a;else otherCol+=a;});
-  const expected=cashSales+cashCol;eodSummary={sales,money,expected,date,ready:true};
+  const expected=cashSales+cashCol;eodSummary={sales,money,expected,date,ready:true,orders:orders||[],collections:collections||[],cashSales,gcashSales,bankSales,otherSales,cashCol,gcashCol,bankCol,otherCol};
   $("eodTotalSales").textContent=eodPeso(sales);$("eodTransactions").textContent=(orders||[]).length;$("eodMoneyReceived").textContent=eodPeso(money);$("eodExpectedCash").textContent=eodPeso(expected);
   $("eodCashSales").textContent=eodPeso(cashSales);$("eodGcashSales").textContent=eodPeso(gcashSales);$("eodBankSales").textContent=eodPeso(bankSales);$("eodOtherSales").textContent=eodPeso(otherSales);$("eodCashCollections").textContent=eodPeso(cashCol);$("eodGcashCollections").textContent=eodPeso(gcashCol);$("eodBankCollections").textContent=eodPeso(bankCol);$("eodOtherCollections").textContent=eodPeso(otherCol);$("eodMoneyReceived2").textContent=eodPeso(money);
   eodRenderRecon();
@@ -2988,7 +2993,7 @@ function escAttr(v){return esc(v).replace(/`/g,'&#96;');}
 </div>
 <script id="v85-owner-reports">
 // V86: Owner corrections use authenticated, audited database transactions.
-const r85Names=['Products','Inventory / Containers','Personnel','Sales & Collections','Areas & Customers','Delivery Performance','Audit & Discrepancies'];
+const r85Names=['Products','Delivery Performance','Personnel','Sales & Collections','Audit & Discrepancies'];
 let r85Tab=0,r85Rows=[],r85Headers=[],r85Orders=[],r85Items=[],r85Payments=[],r85Collections=[],r85Employees=[];
 const r85Money=x=>peso(Number(x||0));
 const r85N=x=>Number(x||0);
@@ -3019,7 +3024,7 @@ function r85PersonnelRows(done, roster){
     return [person.name,...sums.map(r85Money),r85Money(orders.reduce((sum,o)=>sum+r85N(o.actual_amount),0)),orders.reduce((sum,o)=>sum+r85N(o.actual_qty),0)];
   });
 }
-function r85Render(){const orders=r85Orders,done=orders.filter(r85Completed),items=r85Items.filter(x=>done.some(o=>o.id===x.order_id)),group=(arr,key,calc)=>{const m=new Map();arr.forEach(x=>{const k=key(x);if(!m.has(k))m.set(k,[]);m.get(k).push(x)});return [...m].map(([k,v])=>calc(k,v))};const dateNote='Date filters use recorded transaction dates. Figures are read-only; verify against EOD before accounting use.';
+function r85RenderLegacy(){const orders=r85Orders,done=orders.filter(r85Completed),items=r85Items.filter(x=>done.some(o=>o.id===x.order_id)),group=(arr,key,calc)=>{const m=new Map();arr.forEach(x=>{const k=key(x);if(!m.has(k))m.set(k,[]);m.get(k).push(x)});return [...m].map(([k,v])=>calc(k,v))};const dateNote='Date filters use recorded transaction dates. Figures are read-only; verify against EOD before accounting use.';
 if(r85Tab===0){const rows=group(items,x=>x.product?.name||x.product_name||'Unknown product',(k,v)=>[k,v.reduce((a,x)=>a+r85N(x.delivered_qty??x.ordered_qty),0),r85Money(v.reduce((a,x)=>a+r85N(x.line_total??(r85N(x.delivered_qty)*r85N(x.unit_price))),0))]);return r85Display(['Product','Actual Qty / Units','Recorded Line Total'],rows,[['Products',rows.length]],dateNote+' Product quantities may include liters, days, or containers; do not combine these units.');}
 if(r85Tab===1){const rows=group(done.filter(o=>o.channel!=='walk_in'),o=>[o.customer?.full_name||'Unknown',o.area||'—'].join('|'),(k,v)=>[...k.split('|'),v.reduce((a,o)=>a+r85N(o.actual_qty),0),v.reduce((a,o)=>a+r85N(o.containers_returned),0),'Not verified']);return r85Display(['Customer','Area','Delivered (range)','Returned (range)','Outstanding (lifetime)'],rows,[], 'IMPORTANT: Outstanding customer containers cannot be calculated from date-range deliveries minus returns. Opening balances, sold containers, and all historical movements must be reconciled first. This report deliberately does NOT invent outstanding balances.');}
 if(r85Tab===2){return r85Display(['Personnel','North','South','Central','Walk-In','Total Sales','Total TC'],r85PersonnelRows(done,r85Employees),[], 'TC = Total Containers. Total Sales and Total TC include completed walk-in and delivery orders each employee helped handle. Shared orders count once for each contributor, so personnel rows should not be added together for store totals.');}
@@ -3028,7 +3033,7 @@ if(r85Tab===4){const rows=group(done,o=>String(o.channel||'').includes('walk')?'
 if(r85Tab===5){const rows=group(orders,o=>o.status||'Unknown',(k,v)=>[r85Label(k),v.length,v.reduce((a,o)=>a+r85N(o.actual_qty),0),v.reduce((a,o)=>a+r85N(o.containers_returned),0),r85Money(v.reduce((a,o)=>a+r85N(o.actual_amount),0))]);return r85Display(['Status','Orders','Actual Qty','Containers Returned','Recorded Amount'],rows,[],dateNote+' Detailed ordered-versus-delivered variance requires the complete order-item records.');}
 return r85Display(['Event','Count','Status'],[['Void / cancellation audit','—','Requires verified audit log access'],['Price overrides','—','Requires verified change history'],['EOD over / short','—','Requires verified EOD records']],[], 'Audit figures are intentionally not invented. This tab requires a verified read-only audit source before it can display transaction-level changes.');}
 async function r85ReadAll(table,select,filters){let out=[];for(let start=0;;start+=500){let q=db.from(table).select(select).order("id").range(start,start+499);if(filters)q=filters(q);const {data,error}=await q;if(error)throw error;out.push(...(data||[]));if(!data||data.length<500)break;}return out}
-async function loadOwnerReports(){if(typeof currentEmployeeRole==='undefined'||currentEmployeeRole!=='owner'){r85Warn('Owner access required.');$('r85Table').innerHTML='';return}const from=$('r85From').value,to=$('r85To').value;if(!from||!to||from>to){r85Warn('Choose a valid date range.');return}r85Warn('Loading transaction records…');try{const all=await r85ReadAll('orders','id,order_no,channel,status,payment_status,payment_method,delivery_personnel_id,served_by_employee_id,delivered_at,created_at,updated_at,notes,business_date,area,customer_id,actual_amount,amount_collected,actual_qty,containers_returned,customer:customers(full_name),delivery_personnel:employees!orders_delivery_personnel_id_fkey(full_name),served_by:employees!orders_served_by_employee_id_fkey(full_name),order_contributors(employee_id,contribution_type,employee:employees(id,full_name))');r85Employees=await r85ReadAll('employees','id,full_name');r85Orders=all.filter(o=>{const d=r85OrderDate(o);return d>=from&&d<=to});const ids=new Set(r85Orders.map(o=>o.id));const raw=await r85ReadAll('order_items','id,order_id,ordered_qty,delivered_qty,unit_price,line_total,product:products(name)');r85Items=raw.filter(x=>ids.has(x.order_id));const payments=await r85ReadAll('payments','id,order_id,amount,payment_method,reference_number,received_at');r85Payments=payments.filter(p=>ids.has(p.order_id)&&r85Orders.some(o=>o.id===p.order_id&&r85Completed(o)));const collections=await r85ReadAll('credit_collections','id,credit_account_id,amount,original_amount,cancelled_at,cancellation_reason,updated_at,notes,reference_number,payment_method,business_date,collected_at,account:credit_accounts(customer:customers(full_name))');r85AllCollections=collections.filter(c=>{const d=String(c.business_date||c.collected_at||'').slice(0,10);return d>=from&&d<=to});r85Collections=r85AllCollections.filter(c=>!c.cancelled_at);r85Audit=await r85ReadAll('audit_logs','id,category,action,order_id,actor_employee_id,before_data,after_data,detail,created_at');r85Render()}catch(e){r85Orders=[];r85Items=[];r85Payments=[];r85Collections=[];r85AllCollections=[];r85Audit=[];r85Display(['Report status'],[['Unable to load report records.']],[], 'Database read failed: '+String(e.message||e)+'. No records were modified.')}}
+async function loadOwnerReports(){if(typeof currentEmployeeRole==='undefined'||currentEmployeeRole!=='owner'){r85Warn('Owner access required.');$('r85Table').innerHTML='';return}const from=$('r85From').value,to=$('r85To').value;if(!from||!to||from>to){r85Warn('Choose a valid date range.');return}r85Warn('Loading transaction records…');try{const all=await r85ReadAll('orders','id,order_no,channel,status,payment_status,payment_method,delivery_personnel_id,served_by_employee_id,delivered_at,created_at,updated_at,notes,business_date,area,customer_id,actual_amount,amount_collected,actual_qty,containers_returned,customer:customers(full_name,customer_type,area),delivery_personnel:employees!orders_delivery_personnel_id_fkey(full_name),served_by:employees!orders_served_by_employee_id_fkey(full_name),order_contributors(employee_id,contribution_type,employee:employees(id,full_name))');r85Employees=await r85ReadAll('employees','id,full_name');r85Orders=all.filter(o=>{const d=r85OrderDate(o);return d>=from&&d<=to});const ids=new Set(r85Orders.map(o=>o.id));const raw=await r85ReadAll('order_items','id,order_id,ordered_qty,delivered_qty,unit_price,line_total,product:products(name)');r85Items=raw.filter(x=>ids.has(x.order_id));const payments=await r85ReadAll('payments','id,order_id,amount,payment_method,reference_number,received_at');r85Payments=payments.filter(p=>ids.has(p.order_id)&&r85Orders.some(o=>o.id===p.order_id&&r85Completed(o)));const collections=await r85ReadAll('credit_collections','id,credit_account_id,amount,original_amount,cancelled_at,cancellation_reason,updated_at,notes,reference_number,payment_method,business_date,collected_at,account:credit_accounts(customer:customers(full_name))');r85AllCollections=collections.filter(c=>{const d=String(c.business_date||c.collected_at||'').slice(0,10);return d>=from&&d<=to});r85Collections=r85AllCollections.filter(c=>!c.cancelled_at);r85Audit=await r85ReadAll('audit_logs','id,category,action,order_id,actor_employee_id,before_data,after_data,detail,created_at');r85Render()}catch(e){r85Orders=[];r85Items=[];r85Payments=[];r85Collections=[];r85AllCollections=[];r85Audit=[];r85Display(['Report status'],[['Unable to load report records.']],[], 'Database read failed: '+String(e.message||e)+'. No records were modified.')}}
 function exportOwnerReport(){if(!r85Headers.length){alert('Load a report first.');return}const quote=x=>'"'+String(x??'').replace(/"/g,'""')+'"';const csv='\uFEFF'+[r85Headers,...r85Rows].map(row=>row.map(quote).join(',')).join('\r\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='Solavida_V85_'+r85Names[r85Tab].replace(/[^a-z0-9]/gi,'_')+'_'+$('r85From').value+'_'+$('r85To').value+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 let r85AllCollections=[],r85Audit=[],r85Editing=null,r85Saving=false;
 function r85ShortOrderNo(serial){
@@ -3077,7 +3082,73 @@ async function r85SaveCorrection(action){
  finally{r85Saving=false;$('r85EditSave').disabled=false;$('r85EditCancel').disabled=false;}
 }
 
+
+// SOLAVIDA V89: consolidated, read-only delivery performance and staff EOD exports.
+const r89LegacyReportRender=r85RenderLegacy;
+function r85Render(){
+ if(r85Tab===1)return r89RenderDelivery();
+ if(r85Tab===4){r85Tab=6;try{return r89LegacyReportRender();}finally{r85Tab=4;}}
+ return r89LegacyReportRender();
+}
+let r89DeliveryRows=[];
+function r89RenderDelivery(){
+ const root=$('r85Table');if(!root)return;
+ r85ManageRender();
+ const completed=r85Orders.filter(o=>r85Completed(o)&&o.channel!=='walk_in');
+ const groups=new Map();
+ for(const o of completed){
+   const key=String(o.customer_id||'unknown:'+o.customer?.full_name||o.id);
+   if(!groups.has(key))groups.set(key,{key,name:o.customer?.full_name||'Unnamed customer',area:o.area||o.customer?.area||'Unassigned',type:o.customer?.customer_type||'unspecified',orders:[]});
+   groups.get(key).orders.push(o);
+ }
+ r89DeliveryRows=[...groups.values()].sort((a,b)=>a.name.localeCompare(b.name));
+ const areas=[...new Set(r89DeliveryRows.map(x=>x.area))].sort();
+ const previousArea=$('r89Area')?.value||'', previousType=$('r89Type')?.value||'',previousSearch=$('r89Customer')?.value||'';
+ const options=(arr,selected)=>arr.map(x=>`<option value="${esc(x)}" ${x===selected?'selected':''}>${esc(x)}</option>`).join('');
+ $('r85Kpis').innerHTML='';r85Headers=[];r85Rows=[];
+ r85Warn('Recorded activity only. Opening container balances are not yet verified; net movement is NOT the actual containers held by a customer.');
+ root.innerHTML=`<div class="r89-wrap"><div class="r89-head"><h2>Delivery Performance</h2><p>Customer deliveries, returns, transaction counts and sales for the selected period.</p></div>
+ <div id="r89Kpis" class="r89-kpis"></div>
+ <div class="r89-filter"><label>Area<select id="r89Area" onchange="r89Filter()"><option value="">All Areas</option>${options(areas,previousArea)}</select></label><label>Customer<input id="r89Customer" value="${esc(previousSearch)}" placeholder="Search customer" oninput="r89Filter()"></label><label>Customer Type<select id="r89Type" onchange="r89Filter()"><option value="">All Types</option>${options(['residential','establishment','tourist','other'],previousType)}</select></label><button type="button" onclick="r89Clear()">Clear Filters</button></div>
+ <div class="r89-scroll"><table class="r89-table"><thead><tr><th>Customer / History</th><th>Area</th><th>Type</th><th>Delivered</th><th>Returned</th><th>Transactions</th><th>Total Sales</th><th>Net Movement*</th></tr></thead><tbody id="r89Body"></tbody><tfoot id="r89Foot"></tfoot></table></div>
+ <div class="r89-footnote">* Net movement = Delivered − Returned in the selected period. It is not a verified outstanding customer balance. Opening balance remains blank until verified. Expand a customer to see each transaction and cumulative net movement.</div></div>`;
+ r89Filter();
+}
+function r89Clear(){$('r89Area').value='';$('r89Type').value='';$('r89Customer').value='';r89Filter();}
+function r89Filter(){
+ const area=$('r89Area').value,type=$('r89Type').value,query=$('r89Customer').value.trim().toLowerCase();
+ const list=r89DeliveryRows.filter(x=>(!area||x.area===area)&&(!type||x.type===type)&&(!query||x.name.toLowerCase().includes(query)));
+ let delivered=0,returned=0,transactions=0,sales=0;
+ const count=(v)=>Number(v||0).toLocaleString('en-PH');
+ const rowHtml=list.map((x,i)=>{
+  const sorted=[...x.orders].sort((a,b)=>String(a.delivered_at||a.created_at||a.business_date).localeCompare(String(b.delivered_at||b.created_at||b.business_date))||String(a.order_no).localeCompare(String(b.order_no)));
+  const d=sorted.reduce((t,o)=>t+r85N(o.actual_qty),0),r=sorted.reduce((t,o)=>t+r85N(o.containers_returned),0),amt=sorted.reduce((t,o)=>t+r85N(o.actual_amount),0);
+  delivered+=d;returned+=r;transactions+=sorted.length;sales+=amt;
+  let movement=0;
+  const history=sorted.map(o=>{const qty=r85N(o.actual_qty),ret=r85N(o.containers_returned);movement+=qty-ret;return `<tr><td>${esc(r85OrderDate(o))}</td><td>${esc(r85ShortOrderNo(o.order_no))}</td><td>${count(qty)}</td><td>${count(ret)}</td><td>${r85Money(o.actual_amount)}</td><td><strong>${movement>=0?'+':''}${count(movement)}</strong></td></tr>`;}).join('');
+  return `<tr class="r89-main"><td><button type="button" class="r89-expand" onclick="r89Toggle(${i})" aria-expanded="false" id="r89Toggle${i}">▸ ${esc(x.name)}</button></td><td>${esc(x.area)}</td><td>${esc(r85Label(x.type))}</td><td>${count(d)}</td><td>${count(r)}</td><td>${count(sorted.length)}</td><td>${r85Money(amt)}</td><td>${d-r>=0?'+':''}${count(d-r)}</td></tr><tr class="r89-details" id="r89Detail${i}" hidden><td colspan="8"><strong>${esc(x.name)} — Delivery History</strong><div class="r89-notice">Opening balance: Not verified · The running figures below show movement within the selected date range, not actual outstanding containers.</div><div class="r89-scroll"><table><thead><tr><th>Date</th><th>Order No.</th><th>Delivered</th><th>Returned</th><th>Sales</th><th>Running Net Movement*</th></tr></thead><tbody>${history}</tbody><tfoot><tr><th colspan="2">TOTAL</th><th>${count(d)}</th><th>${count(r)}</th><th>${r85Money(amt)}</th><th>${d-r>=0?'+':''}${count(d-r)}</th></tr></tfoot></table></div></td></tr>`;
+ }).join('');
+ $('r89Body').innerHTML=rowHtml||'<tr><td colspan="8">No matching completed delivery transactions for this period.</td></tr>';
+ $('r89Foot').innerHTML=`<tr><th>FILTERED TOTAL · ${count(list.length)} customers</th><th colspan="2">${count(new Set(list.map(x=>x.area)).size)} areas</th><th>${count(delivered)}</th><th>${count(returned)}</th><th>${count(transactions)}</th><th>${r85Money(sales)}</th><th>${delivered-returned>=0?'+':''}${count(delivered-returned)}</th></tr>`;
+ $('r89Kpis').innerHTML=[['Areas',new Set(list.map(x=>x.area)).size],['Customers',list.length],['Transactions',transactions],['Sales',r85Money(sales)],['Containers Delivered',delivered],['Containers Returned',returned]].map(([k,v])=>`<div><span>${esc(k)}</span><strong>${esc(String(v))}</strong></div>`).join('');
+ r85Headers=['Customer','Area','Type','Delivered','Returned','Transactions','Total Sales','Net Movement (unverified)'];
+ r85Rows=list.map(x=>[x.name,x.area,r85Label(x.type),x.orders.reduce((t,o)=>t+r85N(o.actual_qty),0),x.orders.reduce((t,o)=>t+r85N(o.containers_returned),0),x.orders.length,r85Money(x.orders.reduce((t,o)=>t+r85N(o.actual_amount),0)),x.orders.reduce((t,o)=>t+r85N(o.actual_qty)-r85N(o.containers_returned),0)]);
+ r85Rows.push(['FILTERED TOTAL','', '',delivered,returned,transactions,r85Money(sales),delivered-returned]);
+}
+function r89Toggle(i){const tr=$('r89Detail'+i),b=$('r89Toggle'+i);if(!tr)return;tr.hidden=!tr.hidden;b.setAttribute('aria-expanded',String(!tr.hidden));b.textContent=(tr.hidden?'▸ ':'▾ ')+b.textContent.slice(2);}
+function r89Csv(name,rows){const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';const content='\uFEFF'+rows.map(r=>r.map(q).join(',')).join('\r\n');const url=URL.createObjectURL(new Blob([content],{type:'text/csv;charset=utf-8'}));const link=document.createElement('a');link.href=url;link.download=name;document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);}
+function r89EodRows(){if(!eodSummary.ready||eodSummary.date!==$('eodDate').value){alert('Refresh and successfully load the selected date before printing or exporting.');return null;}
+ const s=eodSummary,rows=[['SOLAVIDA — END OF DAY'],['Business Date',s.date],['Total Sales',s.sales],['Sales Transactions',s.orders.length],['Total Money Received',s.money],['Expected Cash',s.expected],['Actual Cash Counted',$('eodActualCash').value||'Not entered'],['Closing Notes',$('eodClosingNotes').value||''],[],['PAYMENTS','Amount'],['Cash Sales',s.cashSales],['GCash Sales',s.gcashSales],['Bank Sales',s.bankSales],['Other Sales',s.otherSales],['Cash Collections',s.cashCol],['GCash Collections',s.gcashCol],['Bank Collections',s.bankCol],['Other Collections',s.otherCol],[],['SALES TRANSACTIONS'],['Order','Customer','Total','Paid','Method','Status','Attended By']];
+ for(const o of s.orders){const team=(o.order_contributors||[]).map(x=>x.employee?.full_name).filter(Boolean).join(' / ')||o.served_by?.full_name||o.delivery_personnel?.full_name||'';rows.push([o.order_no,o.channel==='walk_in'?'Walk-In':o.customer?.full_name||'',o.actual_amount,o.amount_collected,o.payment_status==='credit'?'Credit':o.payment_method||'',o.status,team]);}
+ rows.push([],['PREVIOUS CREDIT COLLECTIONS'],['Date / Time','Customer','Amount','Method','Reference','Received By','Notes']);
+ for(const c of s.collections){rows.push([c.collected_at||'',c.account?.customer?.full_name||'',c.amount,c.payment_method||'',c.reference_number||'',c.received_by?.full_name||'',c.cancelled_at?'Cancelled: '+(c.cancellation_reason||''):c.notes||'']);}
+ rows.push(['TOTAL CREDIT COLLECTIONS','',s.collections.reduce((t,c)=>t+Number(c.amount||0),0)]);
+ return rows;
+}
+function r89EodExport(){const rows=r89EodRows();if(rows)r89Csv('Solavida_EOD_'+eodSummary.date+'.csv',rows);}
+function r89EodPrint(){const rows=r89EodRows();if(!rows)return;const win=window.open('','_blank');if(!win){alert('Allow pop-ups to print the EOD report.');return;}const safe=v=>eodEsc(v);win.document.write('<!doctype html><html><head><title>Solavida EOD '+safe(eodSummary.date)+'</title><style>body{font:12px Arial;padding:20px;color:#15374b}h1{font-size:20px}table{width:100%;border-collapse:collapse}td{border:1px solid #cddfe6;padding:6px;word-break:break-word}tr:has(td:only-child){background:#e7f4f0;font-weight:bold} @page{size:landscape;margin:12mm}</style></head><body><h1>Solavida — End of Day · '+safe(eodSummary.date)+'</h1><table>'+rows.map(r=>'<tr>'+r.map(c=>'<td>'+safe(c)+'</td>').join('')+'</tr>').join('')+'</table></body></html>');win.document.close();win.focus();setTimeout(()=>win.print(),350);}
 (function initV85(){const el=document.getElementById('r85Tabs');if(!el)return;el.innerHTML=r85Names.map((n,i)=>`<button onclick="r85SelectTab(${i})" class="${i===0?'active':''}">${esc(n)}</button>`).join('');r85SetPreset('month');const nav=document.querySelector('[data-tab="reports"]');if(nav)nav.style.display='none';const observer=new MutationObserver(()=>{if(nav)nav.style.display=typeof currentEmployeeRole!=='undefined'&&currentEmployeeRole==='owner'?'':'none'});observer.observe(document.getElementById('app'),{attributes:true,attributeFilter:['class']});})();
 </script>
+<script src="delivery-routes.js"></script>
 </body>
 </html>

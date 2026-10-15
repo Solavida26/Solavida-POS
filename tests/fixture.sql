@@ -1,0 +1,25 @@
+-- Disposable PostgreSQL test fixture. Synthetic records only.
+create role anon; create role authenticated;
+create schema auth;
+create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('test.user',true),'')::uuid$$;
+create type public.employee_role as enum('owner','staff','auditor');
+create type public.order_status as enum('pending','on_the_way','delivered','cancelled');
+create type public.order_channel as enum('walk_in','delivery');
+create type public.payment_status as enum('unpaid','paid','credit');
+create type public.payment_method as enum('cash','gcash','bank_transfer','other');
+create type public.audit_category as enum('order');
+create table employees(id uuid primary key default gen_random_uuid(),auth_user_id uuid,full_name text,role employee_role,active boolean default true);
+create table customers(id uuid primary key default gen_random_uuid(),full_name text,active boolean default true);
+create function public.current_employee_id() returns uuid language sql stable security definer set search_path=public as $$select id from employees where auth_user_id=auth.uid() and active limit 1$$;
+create function public.current_employee_role() returns employee_role language sql stable security definer set search_path=public as $$select role from employees where auth_user_id=auth.uid() and active limit 1$$;
+create function public.current_business_date() returns date language sql stable as $$select (now() at time zone 'Asia/Manila')::date$$;
+create table orders(id uuid primary key default gen_random_uuid(),order_no text,customer_id uuid references customers(id),channel order_channel default 'delivery',status order_status default 'pending',payment_status payment_status default 'unpaid',payment_method payment_method,delivery_personnel_id uuid references employees(id),assigned_by_employee_id uuid references employees(id),on_the_way_at timestamptz,delivered_at timestamptz,cancelled_at timestamptz,cancelled_by_employee_id uuid,actual_qty numeric default 0,actual_amount numeric default 0,amount_collected numeric default 0,amount_received numeric default 0,change_given numeric default 0,containers_returned int default 0,received_by text,notes text,business_date date default current_business_date(),created_at timestamptz default now(),updated_at timestamptz default now());
+create table products(id uuid primary key default gen_random_uuid(),unit text);
+create table order_items(id uuid primary key default gen_random_uuid(),order_id uuid references orders(id),product_id uuid references products(id),ordered_qty numeric,delivered_qty numeric default 0,unit_price numeric,line_total numeric default 0,notes text);
+create table order_contributors(id uuid default gen_random_uuid(),order_id uuid references orders(id),employee_id uuid references employees(id),contribution_type text,unique(order_id,employee_id,contribution_type));
+create table audit_logs(id uuid default gen_random_uuid(),category audit_category,action text,order_id uuid,actor_employee_id uuid,before_data jsonb,after_data jsonb,detail jsonb);
+create table payments(id uuid default gen_random_uuid(),order_id uuid,amount numeric,payment_method payment_method,received_by_employee_id uuid,reference_number text,received_at timestamptz,notes text);
+create table credit_accounts(id uuid primary key default gen_random_uuid(),customer_id uuid unique,notes text);
+create table credit_charges(id uuid default gen_random_uuid(),credit_account_id uuid,order_id uuid,amount numeric,posted_by_employee_id uuid,posted_at timestamptz);
+grant usage on schema public,auth to authenticated,anon;
+grant select,update on orders to authenticated;
