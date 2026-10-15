@@ -23,7 +23,13 @@ def client(command, args, local=False, input=None):
     if result.returncode:
         # SQL errors can include customer values: retain diagnostics locally, never print them.
         (work / 'private-error.log').write_bytes(result.stderr)
-        raise RuntimeError(command+' failed; private diagnostics withheld from public logs. No Live writes were attempted.')
+        error = result.stderr.decode(errors='replace').lower()
+        categories = ['password authentication failed', 'tenant or user not found', 'connection timed out', 'timeout expired', 'could not translate host name', 'connection refused', 'unsupported startup parameter', 'permission denied', 'unrecognized configuration parameter', 'read-only transaction', 'server version mismatch']
+        category = next((c for c in categories if c in error), 'unclassified connection or restore error')
+        if command == 'psql' and not local and args[-1].startswith('select current_database()'):
+            # This first query has no business data. Redact the password defensively.
+            print(result.stderr.decode(errors='replace').replace(password, '[REDACTED]')[-1800:], flush=True)
+        raise RuntimeError(command+' failed: '+category+'. No Live writes were attempted.')
     return result.stdout
 
 def sql(query, local=False):
