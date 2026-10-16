@@ -1,0 +1,5 @@
+node_modules/
+reference/
+test-results/
+
+supabase/.temp/
