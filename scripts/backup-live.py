@@ -62,7 +62,7 @@ try:
         time.sleep(1)
     else: raise RuntimeError('Isolated recovery database did not start.')
     role_sql='\n'.join('CREATE ROLE "'+r.replace('"','""')+'";' for r in json.loads(roles))
-    sql(role_sql+ '\nCREATE SCHEMA extensions; CREATE EXTENSION pgcrypto SCHEMA extensions; CREATE EXTENSION "uuid-ossp" SCHEMA extensions;',True)
+    sql(role_sql+ '\nDROP SCHEMA public; CREATE SCHEMA extensions; CREATE EXTENSION pgcrypto SCHEMA extensions; CREATE EXTENSION "uuid-ossp" SCHEMA extensions;',True)
     # ACLs and owners are restored too; strict exit-on-error, no ignored errors.
     print('Stage: restore into isolated database.', flush=True)
     client('pg_restore',['--exit-on-error','--dbname=postgres','/backup/database.dump'],True)
