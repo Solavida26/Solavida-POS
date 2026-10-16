@@ -856,7 +856,7 @@
   if(!S.map||!S.layer)return;S.layer.clearLayers();
   const start=[STATION.latitude,STATION.longitude],pts=[start];let previous=start;
   const add=(c,l,label,color='')=>{const m=L.marker([Number(l.latitude),Number(l.longitude)],{icon:L.divIcon({className:'',html:`<div class="dr-pin ${color}">${label}</div>`,iconSize:[30,30]})}).addTo(S.layer);m.bindPopup(esc(c.full_name));return m;};
-  add(STATION,STATION,'S','station').bindTooltip('Solavida · Start',{permanent:true,direction:'top',offset:[0,-8]});
+  add(STATION,STATION,'S','station');
   const stops=S.viewTrip?S.stops.filter(s=>s.trip_id===S.viewTrip).sort((a,b)=>a.position-b.position):S.selected;
   stops.forEach((s,i)=>{const l=loc(s.customer_id);if(!l){previous=null;return;}const point=[Number(l.latitude),Number(l.longitude)];add(customer(s.customer_id),l,i+1,s.status==='completed'?'green':s.status==='skipped'?'gray':'');pts.push(point);if(previous)L.polyline([previous,point],{color:'#087bc1',dashArray:'6 8'}).addTo(S.layer);previous=point;});
   if(S.nearby)S.customers.filter(c=>c.active&&(!S.area||c.area===S.area)&&!stops.some(s=>s.customer_id===c.id)).forEach(c=>{const l=loc(c.id);if(l)add(c,l,'•',recency(c));});
