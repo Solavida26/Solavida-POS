@@ -26,6 +26,10 @@ def client(command, args, local=False, input=None):
         error = result.stderr.decode(errors='replace').lower()
         categories = ['password authentication failed', 'tenant or user not found', 'connection timed out', 'timeout expired', 'could not translate host name', 'connection refused', 'unsupported startup parameter', 'permission denied', 'unrecognized configuration parameter', 'read-only transaction', 'server version mismatch']
         category = next((c for c in categories if c in error), 'unclassified connection or restore error')
+        if local:
+            import re
+            for safe in re.findall(r'(?:schema|role|type|function|relation|extension) "[a-zA-Z0-9_. -]+" (?:already exists|does not exist|is not available)', error):
+                print('Recovery diagnostic: '+safe, flush=True)
         if command == 'psql' and not local and args[-1].startswith('select current_database()'):
             # This first query has no business data. Redact the password defensively.
             print(result.stderr.decode(errors='replace').replace(password, '[REDACTED]')[-1800:], flush=True)
@@ -33,13 +37,15 @@ def client(command, args, local=False, input=None):
     return result.stdout
 
 def sql(query, local=False):
+    if not local:
+        query = 'BEGIN READ ONLY; ' + query + '; COMMIT;'
     return client('psql',['-X','-qAt','-v','ON_ERROR_STOP=1','-c',query],local).decode().strip()
 
 try:
     print('Stage: verify read-only source connection.', flush=True)
     identity = sql("select current_database() || ':' || current_user || ':' || current_setting('transaction_read_only')")
     if identity != 'postgres:postgres:on':
-        raise RuntimeError('Unexpected source identity or read-only setting.')
+        raise RuntimeError('Unexpected source identity or read-only setting: '+identity)
     # Archive includes ACLs, owners, functions, policies, triggers, all table data and sequences.
     print('Stage: export database archive.', flush=True)
     client('pg_dump',['--format=custom','--schema=public','--schema=auth','--schema=storage','--schema=supabase_migrations','--lock-wait-timeout=15000','--file=/backup/database.dump'])
