@@ -6,3 +6,6 @@
 .dr-root .dr-filters{align-items:flex-end}.dr-root .dr-filters label{display:flex;flex-direction:column;gap:6px;margin:0}.dr-root .dr-filters input,.dr-root .dr-filters select,.dr-root .dr-filters>button{height:44px;box-sizing:border-box;margin:0}.dr-root .dr-filters>button{align-self:flex-end}.dr-location-help{font-size:14px;color:#365c76;background:#f0f7fc;padding:10px 12px;border-radius:8px;line-height:1.5}
 
 .dr-pin.station{background:#083d67;border-radius:7px;font-size:16px}
+
+/* Keep the nearby-customer checkbox beside its clickable label. */
+.dr-root label:has(> #drNearby){display:inline-flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:8px;margin:0;cursor:pointer;text-align:left}.dr-root #drNearby{display:inline-block;width:18px;height:18px;flex:0 0 18px;margin:0;padding:0;accent-color:#087bc1}
