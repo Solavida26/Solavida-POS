@@ -1,0 +1,8 @@
+const fs=require('fs'),vm=require('vm'),assert=require('node:assert/strict');const c={URLSearchParams};c.globalThis=c;vm.createContext(c);vm.runInContext(fs.readFileSync('road-route.js','utf8'),c);const r=c.SolavidaRoadRoute,stops=[{latitude:9.33,longitude:123.3},{latitude:9.34,longitude:123.31},{latitude:9.35,longitude:123.32}];
+let p=r.request(stops);assert.equal(p.intermediates.length,3);assert.deepEqual(p.origin,p.destination);assert.equal(p.optimizeWaypointOrder,true);assert.equal(r.request(stops,false).intermediates.length,2);
+let result=r.result({routes:[{optimizedIntermediateWaypointIndex:[2,0,1],duration:'950s',distanceMeters:6200}]},3);assert.deepEqual(Array.from(result.indices),[2,0,1]);assert.equal(result.minutes,16);assert.equal(result.kilometers,6.2);
+assert.deepEqual(Array.from(r.result({routes:[{optimizedIntermediateWaypointIndex:[1,0],duration:'60s',distanceMeters:100}]},3,false).indices),[1,0,2]);
+for(const indices of [[0,0,1],[0,1],[0,1,3],[-1,0,1]])assert.throws(()=>r.result({routes:[{optimizedIntermediateWaypointIndex:indices,duration:'60s',distanceMeters:1}]},3));
+for(const bad of [[],Array(21).fill(stops[0]),[{latitude:NaN,longitude:123}],[{latitude:91,longitude:1}],null])assert.throws(()=>r.request(bad));
+const u=new URL(r.embed(stops,'test-key'));assert.equal(u.origin,'https://www.google.com');assert.equal(u.searchParams.get('origin'),'9.3244018,123.2988483');assert.equal(u.searchParams.get('waypoints'),'9.33,123.3|9.34,123.31|9.35,123.32');assert.throws(()=>r.embed(stops,''));
+console.log('PASS route validation, round trip, optimized sequence, estimates, malformed responses and embedded map URL');

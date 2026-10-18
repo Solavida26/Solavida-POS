@@ -756,6 +756,19 @@
  root.SolavidaSavedLocation={parse};
 })(typeof window!=='undefined'?window:globalThis);
 
+/* Google routing helpers. No requests or persistence occur in this module. */
+(function(root){
+ 'use strict';
+ const station={latitude:9.3244018,longitude:123.2988483};
+ const valid=p=>p&&Number.isFinite(p.latitude)&&Number.isFinite(p.longitude)&&Math.abs(p.latitude)<=90&&Math.abs(p.longitude)<=180;
+ function validate(stops){if(!Array.isArray(stops)||!stops.length||stops.length>20)throw Error('Choose between 1 and 20 stops.');if(stops.some(s=>!valid(s)))throw Error('Every selected stop needs a saved precise pin.');return stops;}
+ const waypoint=p=>({location:{latLng:{latitude:p.latitude,longitude:p.longitude}}});
+ function request(stops,roundTrip=true){validate(stops);return {origin:waypoint(station),destination:waypoint(roundTrip?station:stops[stops.length-1]),intermediates:(roundTrip?stops:stops.slice(0,-1)).map(waypoint),travelMode:'DRIVE',routingPreference:'TRAFFIC_UNAWARE',optimizeWaypointOrder:true,languageCode:'en',units:'METRIC'};}
+ function result(data,count,roundTrip=true){const route=data?.routes?.[0],n=roundTrip?count:count-1,indices=route?.optimizedIntermediateWaypointIndex??(n===0?[]:null);if(!Array.isArray(indices)||indices.length!==n||new Set(indices).size!==n||indices.some(i=>!Number.isInteger(i)||i<0||i>=n))throw Error('Google returned an incomplete stop sequence. Please try again.');const match=/^(\d+(?:\.\d+)?)s$/.exec(route.duration||'');if(!match||!Number.isFinite(route.distanceMeters)||route.distanceMeters<0)throw Error('Google returned an invalid route estimate.');return {indices:roundTrip?indices:[...indices,count-1],minutes:Math.ceil(Number(match[1])/60),kilometers:route.distanceMeters/1000};}
+ function embed(stops,key,roundTrip=true){validate(stops);if(!key)throw Error('Google Maps connection is not configured.');const coords=p=>p.latitude+','+p.longitude;const p=new URLSearchParams({key,origin:coords(station),destination:coords(roundTrip?station:stops[stops.length-1]),mode:'driving',units:'metric'});const middle=roundTrip?stops:stops.slice(0,-1);if(middle.length)p.set('waypoints',middle.map(coords).join('|'));return 'https://www.google.com/maps/embed/v1/directions?'+p;}
+ root.SolavidaRoadRoute={station,validate,request,result,embed};
+})(typeof window!=='undefined'?window:globalThis);
+
 /* Solavida delivery routes. Financial completion remains in the existing Orders module. */
 (() => {
  'use strict';
@@ -767,7 +780,7 @@
  const duration=(a,b)=>a&&b?Math.round((new Date(b)-new Date(a))/60000)+' min':'—';
  const short=v=>String(v||'').replace(/^.*?(\d{1,6})$/,'$1');
  const num=v=>Number(v||0).toLocaleString('en-PH');
- const S={date:day(),area:'',orders:[],customers:[],employees:[],locations:[],trips:[],stops:[],members:[],events:[],selected:[],assignedOrders:[],team:[],driver:'',dispatch:false,nearby:false,map:null,layer:null,busy:false,request:crypto.randomUUID(),report:false,viewTrip:null};
+ const S={date:day(),area:'',orders:[],customers:[],employees:[],locations:[],trips:[],stops:[],members:[],events:[],selected:[],assignedOrders:[],team:[],driver:'',dispatch:false,nearby:false,map:null,layer:null,busy:false,request:crypto.randomUUID(),report:false,viewTrip:null,roadReady:false,embedKey:null,roundTrip:true};
  const customer=id=>S.customers.find(c=>c.id===id)||{full_name:'Customer',area:''};
  const emp=id=>S.employees.find(e=>e.id===id)?.full_name||'Unknown employee';
  const loc=id=>S.locations.find(l=>l.customer_id===id)||SolavidaSavedLocation.parse(customer(id).google_maps_url)||SolavidaSavedLocation.parse(customer(id).address);
@@ -779,6 +792,8 @@
  async function all(query){let rows=[];for(let n=0;;n+=1000){const r=await query().range(n,n+999);if(r.error)throw r.error;rows.push(...r.data);if(r.data.length<1000)return rows;}}
  async function refresh(){
   S.dispatch=!!await rpc('delivery_can_dispatch',{});
+  S.roadReady=false;S.embedKey=null;
+  if(S.dispatch&&db.functions){try{const r=await db.functions.invoke('delivery-road-route',{body:{action:'status'}});if(!r.error&&r.data?.ready){S.roadReady=true;S.embedKey=r.data.embedKey;}}catch{ /* Planning remains available without Google. */ }}
   const from=S.report?$('r85From').value:S.date,to=S.report?$('r85To').value:S.date;
   [S.customers,S.employees,S.orders,S.locations,S.trips]=await Promise.all([
    all(()=>db.from('customers').select('id,full_name,area,address,google_maps_url,last_order_at,active').order('id')),
@@ -799,7 +814,7 @@
   if(missing.length)S.orders.push(...await all(()=>db.from('orders').select('id,order_no,customer_id,area,business_date,status,payment_status,notes,actual_qty,containers_returned,order_items(ordered_qty,product:products(unit))').in('id',missing).order('id')));
   if(!S.dispatch&&!S.viewTrip)S.viewTrip=S.trips.find(t=>t.status==='on_the_way')?.id||S.trips[0]?.id||null;
  }
- async function run(fn){if(S.busy)return;S.busy=true;document.querySelectorAll('.dr-root button').forEach(b=>b.disabled=true);try{await fn();}catch(e){error(e);}finally{S.busy=false;document.querySelectorAll('.dr-root button').forEach(b=>b.disabled=false);}}
+ async function run(fn){if(S.busy)return;S.busy=true;document.querySelectorAll('.dr-root button').forEach(b=>b.disabled=true);try{await fn();}catch(e){error(e);}finally{S.busy=false;document.querySelectorAll('.dr-root button').forEach(b=>b.disabled=false);if(!S.roadReady)root()?.querySelectorAll('[data-do=road-preview],[data-do=road-optimize]').forEach(b=>b.disabled=true);}}
  function root(){return S.report?$('r85Table'):$('map');}
  async function open(report=false){S.report=report;const r=root();r.classList.add('dr-root');r.innerHTML='<div class="dr-card">Loading delivery routes…<div id="drMessage"></div></div>';try{await refresh();render();}catch(e){error(e);}}
  function render(){
@@ -817,15 +832,17 @@
   if(S.dispatch){drawSelected();nearby();}map();
  }
  function tripCard(t){const stops=S.stops.filter(s=>s.trip_id===t.id).sort((a,b)=>a.position-b.position),team=S.members.filter(m=>m.trip_id===t.id).map(m=>emp(m.employee_id)).join(', ');
-  return `<details class="dr-stop" ${t.status!=='completed'?'open':''}><summary>Trip ${tripNo(t)} · ${esc(t.status.replaceAll('_',' '))} · ${stops.filter(s=>s.status==='completed').length}/${stops.length} stops</summary><button data-view-map="${t.id}">Show route on map</button><p><strong>Driver:</strong> ${esc(emp(t.driver_id))} · <strong>Personnel:</strong> ${esc(team)}</p><p class="dr-muted">Departure: ${time(t.started_at)} · Finished: ${time(t.finished_at)} · Duration: ${duration(t.started_at,t.finished_at)}</p>${stops.map(s=>{
+  return `<details class="dr-stop" ${t.status!=='completed'?'open':''}><summary>Trip ${tripNo(t)} · ${esc(t.status.replaceAll('_',' '))} · ${stops.filter(s=>s.status==='completed').length}/${stops.length} stops</summary><button data-view-map="${t.id}">Show stops on map</button>${S.dispatch&&S.roadReady?`<button data-road-trip="${t.id}">Show road route</button>`:''}<p><strong>Driver:</strong> ${esc(emp(t.driver_id))} · <strong>Personnel:</strong> ${esc(team)}</p><p class="dr-muted">Departure: ${time(t.started_at)} · Finished: ${time(t.finished_at)} · Duration: ${duration(t.started_at,t.finished_at)}</p>${stops.map(s=>{
    const c=customer(s.customer_id),o=order(s.order_id),l=loc(c.id),nav=l?`https://www.google.com/maps/dir/?api=1${s.position===1?'&origin='+encodeURIComponent(STATION.latitude+','+STATION.longitude):''}&destination=${encodeURIComponent(l.latitude+','+l.longitude)}`:null;
    return `<div class="dr-stop"><span class="dr-pill">${s.position}${t.planned_stops?' (planned '+((t.planned_stops||[]).find(x=>x.id===s.id)?.position??s.position)+')':''} · ${esc(s.status)}</span><h3>${esc(c.full_name)}</h3><p>${esc(c.address||c.area||'Address not saved')} ${o?'· Order '+esc(short(o.order_no)):'· Customer visit'}</p>${o?`<p>Scheduled: ${num(qty(o))} containers · ${esc(o.payment_status)}<br>${esc(o.notes||'')}</p>`:''}<p class="dr-muted">Arrived: ${time(s.arrived_at)} ${s.arrived_by?'by '+esc(emp(s.arrived_by)):''}<br>Completed: ${time(s.completed_at)} ${s.completed_by?'by '+esc(emp(s.completed_by)):''}</p>${s.snapshot?`<p>Delivered: ${num(s.snapshot.actual_qty)} · Returned: ${num(s.snapshot.containers_returned)}</p>`:''}${s.outcome?`<p>${esc(s.outcome)}</p>`:''}<div class="dr-actions">${nav?`<a class="dr-pill" href="${nav}" target="_blank" rel="noopener noreferrer">Open navigation ↗</a>`:'<span class="dr-muted">No verified map location</span>'}${t.status==='on_the_way'&&!['completed','skipped'].includes(s.status)?`${!s.arrived_at?`<button class="primary" data-arrive="${s.id}">Arrived</button>`:''}${s.order_id?`<button data-order="${s.order_id}">Open order / Complete delivery</button>`:`<button data-visit="${s.id}">Finish visit</button>`}`:''}${S.dispatch&&!['completed','cancelled'].includes(t.status)?`<button data-up="${s.id}" title="Move stop earlier">↑ Move earlier</button>`:''}</div></div>`;
   }).join('')}<div class="dr-actions">${S.dispatch&&t.status==='planned'?`<button class="primary" data-depart="${t.id}">Mark on the way</button><button data-cancel-plan="${t.id}">Cancel plan</button>`:''}${t.status==='on_the_way'?`<button class="primary" data-finish="${t.id}">Finish trip</button>`:''}</div></details>`;
  }
- function drawSelected(){const el=$('drSelected');if(!el)return;el.innerHTML='<h3>Selected stops · '+S.selected.length+'</h3>'+S.selected.map((s,i)=>`<div class="dr-order"><span>${i+1}.</span><strong>${esc(customer(s.customer_id).full_name)}</strong><button data-move="${i}">↑</button><button data-remove="${i}">Remove</button></div>`).join('')+`<p><strong>${num(S.selected.reduce((n,s)=>n+qty(order(s.order_id)),0))} containers scheduled</strong></p>`;}
+ function drawSelected(){const el=$('drSelected');if(!el)return;el.innerHTML='<h3>Selected stops · '+S.selected.length+'</h3>'+S.selected.map((s,i)=>`<div class="dr-order"><span>${i+1}.</span><strong>${esc(customer(s.customer_id).full_name)}</strong><button data-move="${i}">↑</button><button data-remove="${i}">Remove</button></div>`).join('')+`<p><strong>${num(S.selected.reduce((n,s)=>n+qty(order(s.order_id)),0))} containers scheduled</strong></p><label class="dr-road-return"><input id="drRoundTrip" type="checkbox" ${S.roundTrip?'checked':''}> Return to Solavida after last stop</label><div class="dr-actions"><button data-do="road-preview" ${!S.roadReady?'disabled':''}>Show road route</button><button class="primary" data-do="road-optimize" ${!S.roadReady?'disabled':''}>Suggest stop order</button></div><p class="dr-muted">${S.roadReady?'Calculates only when requested. Driving estimates exclude delivery time.':'Google road routing is awaiting account setup. You can still plan trips manually.'}</p>`;}
  function toggle(id){S.viewTrip=null;const o=order(id),i=S.selected.findIndex(s=>s.order_id===id);if(i>=0)S.selected.splice(i,1);else S.selected.push({order_id:id,customer_id:o.customer_id});S.request=crypto.randomUUID();render();}
- function change(e){if(e.target.dataset.pick){toggle(e.target.dataset.pick);return;}if(e.target.dataset.member){S.team=[...root().querySelectorAll('[data-member]:checked')].map(x=>x.dataset.member);if(!S.team.includes(S.driver))S.driver='';$('drTeamSummary').textContent=S.team.length?S.team.length+' selected':'Choose personnel';$('drTeamNames').textContent=S.team.map(emp).join(', ');$('drTeamNames').hidden=!S.team.length;$('drDriver').innerHTML='<option value="">Choose driver</option>'+S.employees.filter(x=>S.team.includes(x.id)).map(x=>`<option value="${x.id}" ${S.driver===x.id?'selected':''}>${esc(x.full_name)}</option>`).join('');}if(e.target.id==='drDriver')S.driver=e.target.value;if(e.target.id==='drNearby'){S.nearby=e.target.checked;nearby();mapPins();}}
+ function change(e){if(e.target.id==='drRoundTrip'){S.roundTrip=e.target.checked;return;}if(e.target.dataset.pick){toggle(e.target.dataset.pick);return;}if(e.target.dataset.member){S.team=[...root().querySelectorAll('[data-member]:checked')].map(x=>x.dataset.member);if(!S.team.includes(S.driver))S.driver='';$('drTeamSummary').textContent=S.team.length?S.team.length+' selected':'Choose personnel';$('drTeamNames').textContent=S.team.map(emp).join(', ');$('drTeamNames').hidden=!S.team.length;$('drDriver').innerHTML='<option value="">Choose driver</option>'+S.employees.filter(x=>S.team.includes(x.id)).map(x=>`<option value="${x.id}" ${S.driver===x.id?'selected':''}>${esc(x.full_name)}</option>`).join('');}if(e.target.id==='drDriver')S.driver=e.target.value;if(e.target.id==='drNearby'){S.nearby=e.target.checked;nearby();mapPins();}}
  async function click(e){const b=e.target.closest('button,[data-pick],[data-pick-name]');if(!b)return;
+  if(b.dataset.roadTrip){await run(()=>roadPreview(false,S.stops.filter(s=>s.trip_id===b.dataset.roadTrip).sort((a,b)=>a.position-b.position)));return;}
+  if(['road-preview','road-optimize'].includes(b.dataset.do)){await run(()=>roadPreview(b.dataset.do==='road-optimize'));return;}
   if(b.dataset.do==='team-done'){$('drPersonnel').open=false;$('drPersonnel').querySelector('summary').focus();return;}if(b.dataset.viewMap){S.viewTrip=b.dataset.viewMap;mapPins();$('drMap')?.scrollIntoView({behavior:'smooth'});return;}if(b.dataset.pick)return;if(b.dataset.pickName){toggle(b.dataset.pickName);return;}
   if(b.dataset.move!==undefined){const i=Number(b.dataset.move);if(i>0)[S.selected[i-1],S.selected[i]]=[S.selected[i],S.selected[i-1]];drawSelected();mapPins();return;}
   if(b.dataset.remove!==undefined){S.selected.splice(Number(b.dataset.remove),1);render();return;}
@@ -847,6 +864,27 @@
    else return;
    await refresh();render();if(typeof window.loadSolavidaOrders==='function')await window.loadSolavidaOrders();
   });
+ }
+ function roadPoints(stops){return stops.map(s=>{const p=loc(s.customer_id);return {latitude:p?Number(p.latitude):NaN,longitude:p?Number(p.longitude):NaN};});}
+ async function roadPreview(optimize,provided=null){
+  if(!S.dispatch||!S.roadReady)throw Error('Google road routing is awaiting account setup.');
+  const original=(provided||S.selected).map(s=>({...s})),points=roadPoints(original),roundTrip=provided?false:S.roundTrip;
+  SolavidaRoadRoute.validate(points);
+  const fingerprint=JSON.stringify([original,points,roundTrip]);let proposal=original,estimate=null;
+  if(optimize){
+   const response=await db.functions.invoke('delivery-road-route',{body:{action:'optimize',stops:points,roundTrip}});
+   if(response.error||response.data?.error)throw Error(response.data?.error||'Could not calculate the route. Your selected stops are unchanged.');
+   const data=response.data;
+   if(!Array.isArray(data.indices)||data.indices.length!==original.length||new Set(data.indices).size!==original.length||data.indices.some(i=>!Number.isInteger(i)||i<0||i>=original.length))throw Error('Invalid route response. Your stops are unchanged.');
+   if(!Number.isFinite(data.minutes)||!Number.isFinite(data.kilometers))throw Error('Invalid route estimate.');
+   proposal=data.indices.map(i=>original[i]);estimate=data;
+  }
+  if(!provided&&fingerprint!==JSON.stringify([S.selected,roadPoints(S.selected),S.roundTrip]))throw Error('Your selection changed. Please review the stops before calculating again.');
+  const dialog=document.createElement('dialog');dialog.className='dr-road-dialog';
+  dialog.innerHTML=`<h3>${optimize?'Suggested stop order':'Road route'}</h3><p>${roundTrip?'Starts and ends at Solavida':'Starts at Solavida; final selected stop stays last'}</p>${estimate?`<p><strong>Google Maps estimate: ${num(estimate.minutes)} min · ${estimate.kilometers.toFixed(1)} km</strong><br>Driving only; excludes unloading and collection time. Current traffic is not included.</p>`:''}<ol>${proposal.map(s=>`<li>${esc(customer(s.customer_id).full_name)}</li>`).join('')}</ol><iframe title="Google Maps driving route" referrerpolicy="strict-origin-when-cross-origin" loading="lazy" allowfullscreen></iframe><div class="dr-actions">${optimize?'<button class="primary" data-road-accept>Use this order</button>':''}<button data-road-close>Close</button></div>`;
+  dialog.querySelector('iframe').src=SolavidaRoadRoute.embed(roadPoints(proposal),S.embedKey,roundTrip);
+  root().append(dialog);dialog.showModal();dialog.querySelector('[data-road-close]').onclick=()=>dialog.remove();dialog.oncancel=()=>dialog.remove();
+  const accept=dialog.querySelector('[data-road-accept]');if(accept)accept.onclick=()=>{if(fingerprint!==JSON.stringify([S.selected,roadPoints(S.selected),S.roundTrip])){dialog.remove();error(Error('Your stops changed. Please calculate again.'));return;}S.selected=proposal;S.request=crypto.randomUUID();S.viewTrip=null;dialog.remove();render();};
  }
  function locationDialog(id){const c=customer(id),l=loc(id);const d=document.createElement('dialog');d.innerHTML=`<h3>Verify ${esc(c.full_name)}’s location</h3><p>Use coordinates confirmed with the customer. Do not guess a pin.</p><label>Latitude<input id="drLat" type="number" step="any" min="-90" max="90" value="${l?.latitude??''}"></label><label>Longitude<input id="drLng" type="number" step="any" min="-180" max="180" value="${l?.longitude??''}"></label><button id="drLocationSave" class="primary">Save verified location</button> <button id="drLocationCancel">Cancel</button><p id="drLocationError" role="alert"></p>`;root().append(d);d.showModal();$('drLocationCancel').onclick=()=>d.remove();$('drLocationSave').onclick=async()=>{if(!$('drLat').value||!$('drLng').value){$('drLocationError').textContent='Both coordinates are required.';return;}try{await rpc('delivery_save_location',{p_customer:id,p_lat:Number($('drLat').value),p_lng:Number($('drLng').value)});d.remove();await refresh();render();}catch(e){$('drLocationError').textContent=e.message;}};}
  async function map(){if(!$('drMap'))return;try{if(!window.L){await new Promise((resolve,reject)=>{let s=document.querySelector('#drLeaflet');if(s){s.addEventListener('load',resolve,{once:true});s.addEventListener('error',reject,{once:true});return;}s=document.createElement('script');s.id='drLeaflet';s.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';s.integrity='sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=';s.crossOrigin='';s.onload=resolve;s.onerror=reject;document.head.append(s);});}if(!$('drMap')||S.map)return;S.map=L.map('drMap').setView([STATION.latitude,STATION.longitude],15);L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(S.map);S.layer=L.layerGroup().addTo(S.map);mapPins();}catch(e){if($('drMap'))$('drMap').textContent='Map unavailable. You can still select customers and assign routes using the lists.';}}

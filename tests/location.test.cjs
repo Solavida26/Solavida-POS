@@ -1,6 +1,6 @@
 const fs=require('fs'),vm=require('vm'),assert=require('node:assert/strict');
 const context={URL};context.globalThis=context;vm.createContext(context);
-const bundle=fs.readFileSync('delivery-routes.js','utf8').split('/* Solavida delivery routes.')[0];
+const bundle=fs.readFileSync('delivery-routes.js','utf8').split('/* Google routing helpers.')[0];
 assert.equal(bundle,fs.readFileSync('vendor/openlocationcode.js','utf8')+'\n'+fs.readFileSync('customer-map-location.js','utf8')+'\n');
 vm.runInContext(bundle,context);
 const parse=context.SolavidaSavedLocation.parse,link=q=>'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q);
