@@ -1852,7 +1852,13 @@ $("newName").addEventListener("input",()=>{
   if(newCustomerDupTimer)clearTimeout(newCustomerDupTimer);
   newCustomerDupTimer=setTimeout(updateNewCustomerDuplicateHint,300);
 });
+let deliveryCustomerSaveBusy=false;
 $("saveCustomer").onclick=async()=>{
+  if(deliveryCustomerSaveBusy)return;
+  deliveryCustomerSaveBusy=true;
+  const saveBtn=$("saveCustomer");
+  saveBtn.disabled=true;
+  try {
   message("customerMsg","","");
   const name=$("newName").value.trim();
   if(!name){message("customerMsg","Customer name is required.","err");return;}
@@ -1889,6 +1895,7 @@ $("saveCustomer").onclick=async()=>{
     console.error("Save customer failed",err);
     message("customerMsg","Could not save customer. "+(err?.message||"Please try again."),"err");
   }
+  } finally { deliveryCustomerSaveBusy=false; saveBtn.disabled=false; }
 };
 
 $("createDelivery").onclick=async()=>{
@@ -2135,7 +2142,13 @@ function editCustomer(id){
   const c=customers.find(x=>x.id===id);if(!c)return;
   $('customerEditId').value=id;$('customerFormTitle').textContent='Edit Customer';$('mainCustomerName').value=c.full_name||'';$('mainCustomerPhone').value=c.mobile||'';$('mainCustomerType').value=c.customer_type||'residential';$('mainCustomerArea').value=c.area||'North';$('mainCustomerCity').value=c.city_municipality||'';$('mainCustomerAddress').value=c.address||'';$('mainCustomerMap').value=c.google_maps_url||'';$('mainCustomerPrice').value=c.assigned_price!=null?String(Number(c.assigned_price)):'';$('mainCustomerNotes').value=c.notes||'';$('mainCustomerMsg').innerHTML='';$('customerMainForm').classList.remove('hidden');$('mainCustomerName').focus();$('customerProfileModal').classList.add('hidden');window.scrollTo({top:0,behavior:'smooth'});
 }
+async let mainCustomerSaveBusy=false;
 async function saveMainCustomer(){
+  if(mainCustomerSaveBusy)return;
+  mainCustomerSaveBusy=true;
+  const saveBtn=$('saveMainCustomer');
+  if(saveBtn)saveBtn.disabled=true;
+  try {
   message('mainCustomerMsg','',''); const id=$('customerEditId').value||null, name=$('mainCustomerName').value.trim();
   if(!name){message('mainCustomerMsg','Customer name is required.','err');return}
   const possibleDuplicate=await findSimilarCustomer(name,id);
@@ -2151,6 +2164,7 @@ async function saveMainCustomer(){
   message('mainCustomerMsg',id?'Customer updated successfully.':'Customer saved successfully.','ok');
   await loadCustomerModule(); await loadCustomers();
   setTimeout(()=>closeNewCustomerForm(),500);
+  } finally { mainCustomerSaveBusy=false; if(saveBtn)saveBtn.disabled=false; }
 }
 async function openCustomerProfile(id){
   const c=customers.find(x=>x.id===id);if(!c)return;
