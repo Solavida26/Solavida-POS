@@ -1852,7 +1852,12 @@ $("newName").addEventListener("input",()=>{
   if(newCustomerDupTimer)clearTimeout(newCustomerDupTimer);
   newCustomerDupTimer=setTimeout(updateNewCustomerDuplicateHint,300);
 });
+let customerSaveInProgress=false;
 $("saveCustomer").onclick=async()=>{
+  if(customerSaveInProgress)return;
+  customerSaveInProgress=true;
+  const customerSaveButton=$("saveCustomer");
+  customerSaveButton.disabled=true;
   message("customerMsg","","");
   const name=$("newName").value.trim();
   if(!name){message("customerMsg","Customer name is required.","err");return;}
@@ -1888,6 +1893,9 @@ $("saveCustomer").onclick=async()=>{
   }catch(err){
     console.error("Save customer failed",err);
     message("customerMsg","Could not save customer. "+(err?.message||"Please try again."),"err");
+  } finally {
+    customerSaveInProgress=false;
+    customerSaveButton.disabled=false;
   }
 };
 
