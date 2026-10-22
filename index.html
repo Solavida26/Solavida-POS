@@ -2142,7 +2142,7 @@ function editCustomer(id){
   const c=customers.find(x=>x.id===id);if(!c)return;
   $('customerEditId').value=id;$('customerFormTitle').textContent='Edit Customer';$('mainCustomerName').value=c.full_name||'';$('mainCustomerPhone').value=c.mobile||'';$('mainCustomerType').value=c.customer_type||'residential';$('mainCustomerArea').value=c.area||'North';$('mainCustomerCity').value=c.city_municipality||'';$('mainCustomerAddress').value=c.address||'';$('mainCustomerMap').value=c.google_maps_url||'';$('mainCustomerPrice').value=c.assigned_price!=null?String(Number(c.assigned_price)):'';$('mainCustomerNotes').value=c.notes||'';$('mainCustomerMsg').innerHTML='';$('customerMainForm').classList.remove('hidden');$('mainCustomerName').focus();$('customerProfileModal').classList.add('hidden');window.scrollTo({top:0,behavior:'smooth'});
 }
-async let mainCustomerSaveBusy=false;
+let mainCustomerSaveBusy=false;
 async function saveMainCustomer(){
   if(mainCustomerSaveBusy)return;
   mainCustomerSaveBusy=true;
