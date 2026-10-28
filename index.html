@@ -2474,9 +2474,9 @@ $("savePasswordBtn").onclick=async()=>{
     if(o.status==="pending"){
       actions=`<button class="action-primary" id="openAssign">🚚 Assign Delivery Personnel</button><button class="action-danger" id="cancelOrder">Cancel Order</button>`;
     }else if(o.status==="on_the_way"){
-      actions=`<button class="action-primary" id="openComplete">✓ Complete Delivery</button><button class="action-danger" id="cancelOrder">Cancel Order</button>`;
+      actions=`<button class="action-primary" id="openComplete">✓ Complete Delivery</button><button class="action-primary" id="printDeliveryReceipt">🖨 Print Delivery Receipt</button><button class="action-danger" id="cancelOrder">Cancel Order</button>`;
     }else if(o.status==="delivered"){
-      actions=`<div class="status-chip delivered">✓ DELIVERY COMPLETED</div>`;
+      actions=`<div class="status-chip delivered">✓ DELIVERY COMPLETED</div><button class="action-primary" id="printDeliveryReceipt">🖨 Reprint Delivery Receipt</button>`;
     }
     $("orderDetailPanel").innerHTML=`
       <div class="detail-head"><div class="detail-head-top"><div><div class="detail-order-no">${o.order_no||"ORDER"}</div><h3>${customer?.full_name||"Walk-In"}</h3><div class="detail-sub">${o.channel==="delivery"?"Delivery":"Walk-In"} • Created ${fmtDate(o.created_at)}</div></div><span class="status-chip ${orderStatusClass(o.status)}">${orderStatusLabel(o.status)}</span></div></div>
@@ -2505,6 +2505,7 @@ $("savePasswordBtn").onclick=async()=>{
       </div>`;
     if(o.status==="pending") $("openAssign").onclick=()=>showAssignBox(o);
     if(o.status==="on_the_way") $("openComplete").onclick=()=>showCompleteBox(o);
+    if($("printDeliveryReceipt")) $("printDeliveryReceipt").onclick=()=>window.solavidaPrintDeliveryReceipt(o);
     if($("cancelOrder")) $("cancelOrder").onclick=()=>cancelSelected(o);
   }
   async function loadOrders(){
@@ -3184,5 +3185,6 @@ function r89EodPrint(){const rows=r89EodRows();if(!rows)return;const win=window.
 (function initV85(){const el=document.getElementById('r85Tabs');if(!el)return;el.innerHTML=r85Names.map((n,i)=>`<button onclick="r85SelectTab(${i})" class="${i===0?'active':''}">${esc(n)}</button>`).join('');r85SetPreset('month');const nav=document.querySelector('[data-tab="reports"]');if(nav)nav.style.display='none';const observer=new MutationObserver(()=>{if(nav)nav.style.display=typeof currentEmployeeRole!=='undefined'&&currentEmployeeRole==='owner'?'':'none'});observer.observe(document.getElementById('app'),{attributes:true,attributeFilter:['class']});})();
 </script>
 <script src="delivery-routes.js"></script>
+<script src="delivery-receipt.js"></script>
 </body>
 </html>
