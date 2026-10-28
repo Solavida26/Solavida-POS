@@ -2176,8 +2176,28 @@ async function openCustomerProfile(id){
   <div class="profile-section"><h4>Delivery Pricing</h4><div class="profile-pricing"><div class="profile-price-row"><span>Purified Water — Container</span><strong>${customerPriceText(c.assigned_price,35)} / container</strong></div><div class="profile-price-row"><span>Alkaline Water — Container</span><strong>₱55.00 standard / container</strong></div></div></div>
   <div class="profile-section"><h4>Transaction History</h4><div class="profile-orders"><div class="profile-order-row header"><span>Order</span><span>Date</span><span>Qty</span><span>Amount</span></div>${orders.length?orders.map(o=>`<div class="profile-order-row"><b>${escapeHtml(o.order_no||'—')}</b><span>${customerDate(o.delivered_at||o.created_at)}</span><span>${Number(o.actual_qty||0)}</span><span>${peso(Number(o.actual_amount||0))}</span></div>`).join(''):'<div style="padding:14px;color:#8ca0aa;font-size:11px">No completed delivery history yet.</div>'}</div></div>
   <div class="profile-section"><h4>Notes</h4><div class="profile-notes">${escapeHtml(c.notes||'No notes saved.')}</div></div>
-  <div class="customer-form-actions"><button class="secondary" onclick="editCustomer('${c.id}')">Edit Customer</button></div>`;
+  <div class="customer-form-actions"><button class="secondary" onclick="editCustomer('${c.id}')">Edit Customer</button>${window.currentEmployeeRole==='owner'?`<button class="secondary" style="color:#a32117" onclick="ownerDeleteCustomer('${c.id}')">Delete Customer</button>`:''} </div>`;
   $('customerProfileModal').classList.remove('hidden');
+}
+let ownerDeleteCustomerBusy=false;
+async function ownerDeleteCustomer(id){
+  if(window.currentEmployeeRole!=='owner'){alert('Owner access required.');return;}
+  if(ownerDeleteCustomerBusy)return;
+  const c=customers.find(row=>row.id===id);
+  if(!c){alert('Customer not found. Refresh and try again.');return;}
+  if(!confirm('Remove '+(c.full_name||'this customer')+' from active customers? This cannot be done if the customer has linked records. Historical data will not be deleted.'))return;
+  ownerDeleteCustomerBusy=true;
+  try{
+    const {data,error}=await db.from('customers').update({active:false}).eq('id',id).eq('active',true).select('id');
+    if(error)throw error;
+    if(!data||data.length!==1)throw new Error('Customer was not changed. Check owner permissions or refresh the list.');
+    closeCustomerProfile();
+    await loadCustomers();
+    await loadCustomerModule();
+    alert('Customer removed from active lists. Historical records are preserved.');
+  }catch(error){
+    alert('Cannot remove customer: '+(error?.message||'Please try again.'));
+  }finally{ownerDeleteCustomerBusy=false;}
 }
 function closeCustomerProfile(){$('customerProfileModal').classList.add('hidden')}
 
