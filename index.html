@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Solavida POS — V90 Delivery Routes</title>
+<title>Solavida POS — V93 Visual Refinement</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--bg:#f5f8f7;--card:#fff;--text:#18322d;--muted:#71807c;--line:#dce7e3;--primary:#087f69;--soft:#e8f3f0}
@@ -857,6 +857,7 @@ main{
 .r89-wrap{font-size:14px}.r89-head h2{margin:12px 0 4px}.r89-head p{margin:0 0 14px;color:#5c7180}.r89-kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-bottom:15px}.r89-kpis>div{background:#f1faf7;border:1px solid #d2e8e1;padding:13px;border-radius:12px}.r89-kpis span{display:block;font-size:12px;color:#496879}.r89-kpis strong{display:block;font-size:21px;color:#0e4467;margin-top:6px}.r89-filter{display:grid;grid-template-columns:1fr 1.7fr 1fr auto;gap:12px;align-items:end;background:#f6fbff;border:1px solid #dfebef;border-radius:12px;padding:14px;margin:10px 0 16px}.r89-filter label{font-weight:700}.r89-filter input,.r89-filter select{margin:5px 0 0}.r89-filter button{background:#e7f0f4;color:#145b75}.r89-scroll{overflow-x:auto}.r89-table{width:100%;border-collapse:collapse;background:white}.r89-table td,.r89-table th{border:1px solid #dce9eb;padding:11px;text-align:left}.r89-table thead,.r89-table tfoot{background:#e4f3ed}.r89-expand{background:none;border:0;padding:3px;color:#0c4f75;text-align:left;font-weight:800}.r89-details>td{background:#f6fbf9;padding:14px}.r89-details table{width:100%;border-collapse:collapse;margin-top:8px}.r89-details table td,.r89-details table th{padding:8px;border:1px solid #d7e8e1}.r89-notice,.r89-footnote{color:#81611e;background:#fff8e8;padding:9px;margin:8px 0;border-radius:8px}.r89-footnote{margin-top:12px}.eod-date-tools{flex-wrap:wrap}@media(max-width:1100px){.r89-kpis{grid-template-columns:repeat(3,1fr)}.r89-filter{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:650px){.r89-kpis,.r89-filter{grid-template-columns:1fr}}
 </style>
 <link rel="stylesheet" href="delivery-routes.css">
+<link rel="stylesheet" href="visual-v93.css">
 </head>
 <body>
 
@@ -885,7 +886,7 @@ main{
 
 <section id="app" class="hidden">
 <header class="top">
-  <div class="brand-anchor" aria-hidden="true"></div>
+  <div class="brand-anchor"><svg viewBox="0 0 28 36" aria-hidden="true" focusable="false"><path fill="currentColor" d="M14 1C12 4 2 17 2 23a12 12 0 0 0 24 0C26 17 16 4 14 1Z"/><path d="M20 23c0 4-2 6-5 7" fill="none" stroke="#12a9ed" stroke-width="2" stroke-linecap="round"/></svg><span>Solavida</span></div>
   <div id="employee" class="muted"></div>
   <button id="logout">Sign Out</button>
 </header>
