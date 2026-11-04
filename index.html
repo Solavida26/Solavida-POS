@@ -3186,6 +3186,6 @@ function r89EodPrint(){const rows=r89EodRows();if(!rows)return;const win=window.
 (function initV85(){const el=document.getElementById('r85Tabs');if(!el)return;el.innerHTML=r85Names.map((n,i)=>`<button onclick="r85SelectTab(${i})" class="${i===0?'active':''}">${esc(n)}</button>`).join('');r85SetPreset('month');const nav=document.querySelector('[data-tab="reports"]');if(nav)nav.style.display='none';const observer=new MutationObserver(()=>{if(nav)nav.style.display=typeof currentEmployeeRole!=='undefined'&&currentEmployeeRole==='owner'?'':'none'});observer.observe(document.getElementById('app'),{attributes:true,attributeFilter:['class']});})();
 </script>
 <script src="delivery-routes.js"></script>
-<script src="delivery-receipt-b4210556.js"></script>
+<script src="delivery-receipt.js?v=47e0387"></script>
 </body>
 </html>
