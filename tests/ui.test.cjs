@@ -7,7 +7,7 @@ await page.addInitScript(()=>{
  window.L={map:()=>({setView(){return this;},remove(){},fitBounds(){}}),tileLayer:()=>({addTo(){}}),layerGroup:()=>({addTo(){return this;},clearLayers(){window.mapMarkers=[];window.mapLines=[];}}),divIcon:x=>x,latLngBounds:x=>x,marker:(point,options)=>{window.mapMarkers.push({point,options});return {addTo(){return this;},bindPopup(){return this;},bindTooltip(){return this;}};},polyline:points=>{window.mapLines.push(points);return {addTo(){return this;}};}};
  window.fixture={customers:[{id:'c1',full_name:'Maria Santos',area:'North',active:true,google_maps_url:'https://www.google.com/maps/search/?api=1&query=9.33%2C123.30'},{id:'c2',full_name:'Rosa Cruz',area:'South',active:true}],employees:[{id:'e1',full_name:'Owner',active:true,auth_user_id:'a1'},{id:'e2',full_name:'Driver One',active:true,auth_user_id:'a2'},{id:'e3',full_name:'Helper One',active:true,auth_user_id:null}],orders:[{id:'o1',order_no:'2026-0012',customer_id:'c1',area:'North',business_date:'2026-10-06',status:'pending',payment_status:'unpaid',order_items:[{ordered_qty:4,product:{unit:'container'}}]},{id:'o2',order_no:'2026-0013',customer_id:'c2',area:'South',business_date:d,status:'pending',payment_status:'unpaid',order_items:[{ordered_qty:6,product:{unit:'container'}}]}],delivery_locations:[],delivery_trips:[],delivery_stops:[],delivery_trip_members:[],delivery_route_events:[]};window.calls=[];window.queryCalls=[];
  const query=table=>{const obj={then:resolve=>Promise.resolve({data:window.fixture[table]||[],error:null}).then(resolve)};for(const m of ['select','order','eq','gte','lte','range','in','limit','is','not'])obj[m]=(...args)=>{window.queryCalls.push([table,m,...args]);return obj;};return obj;};
- window.testDb={auth:{getSession:async()=>({data:{session:null}}),onAuthStateChange:()=>({data:{subscription:{unsubscribe(){}}}})},from:query,rpc:async(n,a)=>{window.calls.push([n,a]);if(n==='delivery_can_dispatch')return {data:window.currentEmployeeRole==='owner',error:null};if(n==='delivery_customer_recency')return {data:[],error:null};return {data:null,error:null};}};
+ window.testDb={auth:{getSession:async()=>({data:{session:null}}),onAuthStateChange:()=>({data:{subscription:{unsubscribe(){}}}})},from:query,rpc:async(n,a)=>{window.calls.push([n,a]);if(n==='delivery_can_dispatch')return {data:window.currentEmployeeRole==='owner'||!!window.testDispatcher,error:null};if(n==='delivery_customer_recency')return {data:[],error:null};return {data:null,error:null};}};
 });
 await page.goto('file://'+require('path').resolve(__dirname,'../index.html'));await page.evaluate(()=>{window.currentEmployeeRole='owner';window.currentEmployeeId='e1';document.getElementById('login').classList.add('hidden');document.getElementById('app').classList.remove('hidden');showTab('map');});
 await page.getByRole('heading',{name:'1. Choose customers'}).waitFor();assert.equal(await page.locator('[data-pick]').count(),2);assert.equal(await page.evaluate(()=>window.queryCalls.some(q=>q[0]==='orders'&&['gte','lte'].includes(q[1]))),false);assert.equal(await page.evaluate(()=>window.queryCalls.some(q=>q[0]==='orders'&&q[1]==='eq'&&q[2]==='status'&&q[3]==='pending')),true);
@@ -27,5 +27,24 @@ await page.evaluate(()=>{for(let i=3;i<=11;i++){window.fixture.customers.push({i
 await page.setViewportSize({width:390,height:844});
 assert.equal(await page.evaluate(()=>document.getElementById('map').scrollWidth<=document.getElementById('map').clientWidth),true);
 await page.screenshot({path:'/tmp/solavida-route-mobile.png',fullPage:true});
+
+await page.evaluate(()=>{
+ window.testDispatcher=true;window.currentEmployeeRole='staff';window.currentEmployeeId='e1';
+ window.fixture.delivery_trips=[{id:'t1',trip_no:1,status:'on_the_way',driver_id:'e2'}];
+ window.fixture.delivery_stops=[{id:'s1',trip_id:'t1',customer_id:'c1',order_id:'o1',position:1,status:'pending'}];
+ window.fixture.delivery_trip_members=[{trip_id:'t1',employee_id:'e2'}];
+ window.openDeliveryRouteOrder=async id=>{window.openedForCompletion=id;};showTab('map');
+});
+await page.locator('[data-arrive="s1"]').waitFor();
+assert.equal(await page.locator('#drDispatcher').count(),0);
+let proxyPrompt='';page.once('dialog',async d=>{proxyPrompt=d.message();await d.accept('Driver phoned cashier');});
+await page.locator('[data-arrive="s1"]').click();
+await page.waitForFunction(()=>window.calls.some(c=>c[0]==='delivery_stop_action'));
+assert.match(proxyPrompt,/Dispatcher\/Owner/);
+assert.deepEqual(await page.evaluate(()=>window.calls.find(c=>c[0]==='delivery_stop_action')[1]),{p_stop:'s1',p_action:'arrive',p_note:'Driver phoned cashier'});
+await page.locator('[data-order="o1"]').click();assert.equal(await page.evaluate(()=>window.openedForCompletion),'o1');
+await page.locator('[data-finish="t1"]').click();await page.waitForFunction(()=>window.calls.some(c=>c[0]==='delivery_finish'));
+console.log('PASS authorized cashier arrival, reporter note, completion navigation and finish controls without owner permission grants');
+
 assert.deepEqual(errors,[]);await browser.close();console.log('PASS desktop selection, multiple personnel, request payload, Owner report, Staff controls, mobile width, no JavaScript errors');})().catch(e=>{console.error(e);process.exit(1)});
 
