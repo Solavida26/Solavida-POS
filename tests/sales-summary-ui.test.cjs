@@ -1,0 +1,48 @@
+const {chromium}=require('playwright');const fs=require('fs');const assert=require('node:assert/strict');
+(async()=>{const browser=await chromium.launch({headless:true});const page=await browser.newPage({viewport:{width:1440,height:1000}});const errors=[];page.on('pageerror',e=>errors.push(e.message));
+await page.route('**/*',async r=>{const u=r.request().url();if(u.startsWith('file:'))return r.continue();if(u.includes('supabase-js'))return r.fulfill({contentType:'text/javascript',body:`window.supabase={createClient:()=>window.testDb}`});return r.abort();});
+await page.addInitScript(()=>{
+ const d=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Manila'}).format(new Date());
+ window.mapMarkers=[];window.mapLines=[];
+ window.L={map:()=>({setView(){return this;},remove(){},fitBounds(){}}),tileLayer:()=>({addTo(){}}),layerGroup:()=>({addTo(){return this;},clearLayers(){window.mapMarkers=[];window.mapLines=[];}}),divIcon:x=>x,latLngBounds:x=>x,marker:(point,options)=>{window.mapMarkers.push({point,options});return {addTo(){return this;},bindPopup(){return this;},bindTooltip(){return this;}};},polyline:points=>{window.mapLines.push(points);return {addTo(){return this;}};}};
+ window.fixture={customers:[{id:'c1',full_name:'Maria Santos',area:'North',active:true,google_maps_url:'https://www.google.com/maps/search/?api=1&query=9.33%2C123.30'},{id:'c2',full_name:'Rosa Cruz',area:'South',active:true}],employees:[{id:'e1',full_name:'Owner',active:true,auth_user_id:'a1'},{id:'e2',full_name:'Driver One',active:true,auth_user_id:'a2'},{id:'e3',full_name:'Helper One',active:true,auth_user_id:null}],orders:[{id:'o1',order_no:'2026-0012',customer_id:'c1',area:'North',business_date:'2026-10-06',status:'pending',payment_status:'unpaid',order_items:[{ordered_qty:4,product:{unit:'container'}}]},{id:'o2',order_no:'2026-0013',customer_id:'c2',area:'South',business_date:d,status:'pending',payment_status:'unpaid',order_items:[{ordered_qty:6,product:{unit:'container'}}]}],delivery_locations:[],delivery_trips:[],delivery_stops:[],delivery_trip_members:[],delivery_route_events:[]};window.calls=[];window.queryCalls=[];
+ const query=table=>{const obj={then:resolve=>Promise.resolve({data:window.fixture[table]||[],error:window.failTable===table?{message:'Controlled read failure'}:null}).then(resolve)};for(const m of ['select','order','eq','gte','lte','range','in','limit','is','not'])obj[m]=(...args)=>{window.queryCalls.push([table,m,...args]);return obj;};return obj;};
+ window.testDb={auth:{getSession:async()=>({data:{session:null}}),onAuthStateChange:()=>({data:{subscription:{unsubscribe(){}}}})},from:query,rpc:async(n,a)=>{window.calls.push([n,a]);if(n==='delivery_can_dispatch')return {data:window.currentEmployeeRole==='owner',error:null};if(n==='delivery_customer_recency')return {data:[],error:null};return {data:null,error:null};}};
+});
+await page.goto('file://'+require('path').resolve(__dirname,'../index.html'));
+await page.evaluate(async()=>{
+ window.currentEmployeeRole='owner';window.currentEmployeeId='e1';
+ document.getElementById('login').classList.add('hidden');document.getElementById('app').classList.remove('hidden');
+ const order=(id,business_date,actual_amount,actual_qty,more={})=>({id,order_no:'SV-'+id,business_date,actual_amount,actual_qty,status:'delivered',channel:'delivery',area:'North',...more});
+ window.fixture.orders=[order('old','2026-10-01',100,5),order('new','2026-11-03',200,10),order('walk','2026-11-04',30,2,{channel:'walk_in'})];
+ window.fixture.payments=[{id:'p1',order_id:'old',amount:40,payment_method:'cash',received_at:'2026-11-01T00:00:00Z'},{id:'p2',order_id:'walk',amount:30,payment_method:'gcash',received_at:'2026-11-04T00:00:00Z'}];
+ window.fixture.credit_charges=[{id:'cc1',credit_account_id:'a',order_id:'old',amount:100,posted_at:'2026-10-01'},{id:'cc2',credit_account_id:'a',order_id:'new',amount:200,posted_at:'2026-11-03'}];
+ window.fixture.credit_collections=[{id:'col1',credit_account_id:'a',amount:150,payment_method:'bank_transfer',business_date:'2026-11-05'}];
+ document.getElementById('reports').classList.remove('hidden');r85Tab=3;
+ document.getElementById('r85From').value='2026-11-01';document.getElementById('r85To').value='2026-11-12';await loadOwnerReports();
+});
+assert.match(await page.locator('#r85Kpis').innerText(),/Sales Summary/);
+assert.deepEqual(await page.locator('#r85Kpis dd').allTextContents(),['₱230.00','12']);
+assert.match(await page.locator('#r85Table').innerText(),/₱220.00/);assert.match(await page.locator('#r85Table').innerText(),/₱150.00/);
+assert.equal(await page.locator('#r85Table').getByText('Credit Sales Generated',{exact:true}).count(),0);
+const downloadEvent=page.waitForEvent('download');await page.evaluate(()=>exportOwnerReport());const download=await downloadEvent;
+assert.equal(download.suggestedFilename(),'Solavida_Sales_Collections_2026-11-01_2026-11-12.csv');
+const csv=fs.readFileSync(await download.path(),'utf8');assert.match(csv,/"Total Sales","230"/);assert.match(csv,/"Total TC","12"/);assert.match(csv,/"Total Payments","220"/);assert.match(csv,/"Total Collectibles","150"/);assert.match(csv,/"Bank Transfer","150"/);
+await page.evaluate(()=>{window.printedHtml='';window.open=()=>({document:{write:s=>window.printedHtml+=s,close(){}},focus(){},print(){window.printCalls=(window.printCalls||0)+1;}});r94PrintOwnerReport();});
+await page.waitForFunction(()=>window.printCalls===1);assert.match(await page.evaluate(()=>window.printedHtml),/2026-11-01 to 2026-11-12/);assert.match(await page.evaluate(()=>window.printedHtml),/₱220.00/);assert.match(await page.evaluate(()=>window.printedHtml),/Current/);
+// Only report reads have been performed. Existing correction buttons remain available.
+assert.ok(await page.locator('#r85TransactionBody button').count());
+assert.equal(await page.evaluate(()=>window.calls.length),0);
+await page.locator('#reports').screenshot({path:'/tmp/solavida-sales-desktop.png'});
+console.log('SALES_SCREENSHOT_BASE64:'+fs.readFileSync('/tmp/solavida-sales-desktop.png').toString('base64'));
+await page.setViewportSize({width:390,height:844});
+assert.equal(await page.locator('.r85-summary').evaluate(el=>el.scrollWidth<=el.clientWidth+1),true);
+await page.evaluate(()=>{document.getElementById('r85To').value='2026-11-11';});
+let alertText='';page.once('dialog',async d=>{alertText=d.message();await d.accept();});await page.evaluate(()=>exportOwnerReport());assert.match(alertText,/Load the selected date range/);
+await page.evaluate(async()=>{window.failTable='credit_charges';await loadOwnerReports();});
+assert.equal(await page.evaluate(()=>window.r94SalesData),null);assert.match(await page.locator('#r85Message').innerText(),/Controlled read failure/);
+await page.evaluate(async()=>{window.failTable=null;await loadOwnerReports();r85SelectTab(2);});
+assert.match(await page.locator('#r85Table').innerText(),/Personnel/);
+await page.evaluate(()=>r85SelectTab(3));assert.match(await page.locator('#r85Kpis').innerText(),/Sales Summary/);
+assert.deepEqual(errors,[]);await browser.close();console.log('PASS Sales UI, loader integration, read-only calls, summary/CSV/print parity, stale dates, read failure, tab switching, mobile width, no JavaScript errors');
+})().catch(e=>{console.error(e);process.exit(1)});

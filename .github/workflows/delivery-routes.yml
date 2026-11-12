@@ -15,6 +15,8 @@ jobs:
           cache: npm
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: npm test
+      - run: node tests/sales-summary.test.cjs
       - run: node --check delivery-routes.js
       - run: npx playwright install --with-deps chromium
       - run: npm run test:ui
+      - run: node tests/sales-summary-ui.test.cjs
