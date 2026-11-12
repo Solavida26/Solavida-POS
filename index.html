@@ -2852,7 +2852,7 @@ async function loadEOD(){
   $("eodCloseDay").onclick=closeEOD;
   const date=input.value;
   eodSetMsg('','ok');
-  const {data:orders,error:oe}=await db.from('orders').select(`id,order_no,customer_id,channel,status,payment_status,payment_method,actual_amount,actual_qty,amount_collected,delivered_at,business_date,served_by_employee_id,delivery_personnel_id,customer:customers(full_name),served_by:employees!orders_served_by_employee_id_fkey(full_name),delivery_personnel:employees!orders_delivery_personnel_id_fkey(full_name),payments(amount,payment_method,reference_number,received_at),order_contributors(employee:employees(full_name,active))`).eq('status','delivered').eq('business_date',date).order('delivered_at',{ascending:false});
+  const {data:orders,error:oe}=await db.from('orders').select(`id,order_no,customer_id,area,channel,status,payment_status,payment_method,actual_amount,actual_qty,amount_collected,delivered_at,business_date,served_by_employee_id,delivery_personnel_id,customer:customers(full_name),served_by:employees!orders_served_by_employee_id_fkey(full_name),delivery_personnel:employees!orders_delivery_personnel_id_fkey(full_name),payments(amount,payment_method,reference_number,received_at),order_contributors(employee:employees(full_name,active))`).eq('status','delivered').eq('business_date',date).order('delivered_at',{ascending:false});
   if(sequence!==eodLoadSequence)return;if(oe)throw new Error('Sales could not load: '+oe.message);
   const {data:collections, error:ce}=await db.from('credit_collections').select('id,credit_account_id,amount,original_amount,cancelled_at,cancellation_reason,payment_method,business_date,collected_at,reference_number,notes,account:credit_accounts!credit_collections_credit_account_id_fkey(customer:customers!credit_accounts_customer_id_fkey(full_name)),received_by:employees!credit_collections_received_by_employee_id_fkey(full_name)').eq('business_date',date).order('collected_at',{ascending:false});
   if(sequence!==eodLoadSequence)return;if(ce)throw new Error('Credit collections could not load: '+ce.message);
@@ -3189,5 +3189,6 @@ function r89EodPrint(){const rows=r89EodRows();if(!rows)return;const win=window.
 <script src="delivery-routes.js"></script>
 <script src="delivery-receipt.js?v=47e0387"></script>
 <script src="sales-summary.js?v=20261112-1"></script>
+<script src="eod-layout.js?v=20261112-1"></script>
 </body>
 </html>
