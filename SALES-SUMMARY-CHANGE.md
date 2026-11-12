@@ -14,4 +14,8 @@ Validation: `node tests/sales-summary.test.cjs`, `node tests/sales-summary-ui.te
 
 Rollback: restore `index.html` from commit `6cb0413ed064c2e482947fdd77d041c8fca704ac` in a new commit on main. The old page has no reference to the new reporting module. Render redeploys main automatically. No database rollback is required. The baseline live index was verified against that commit's blob `9f1519b4d1fe310b6ecb113005cb4cfedc5683a1` before editing.
 
-Deployment status: candidate awaiting automated browser checks and publication. See the pull request checks and Render deployment for final status.
+Verification passed: GitHub Actions run 43129489159 (job 130889788359), including the existing 48 route checks and browser checks plus the new calculation and browser tests. Independently reconciled the read-only production data for 1–12 November: Sales PHP 81,215; TC 3,892; receipts PHP 97,990; Current collectibles PHP 4,395; Previous PHP 3,995. No business records were changed.
+
+Receipt-date observation: 41 payments totaling PHP 5,970 on 1 November sales have recorded Philippine receipt dates of 31 October. The report follows those stored receipt dates; it does not rewrite them.
+
+Release tracked in PR #9. Render automatically publishes main to https://solavida-pos.onrender.com/. Browser screenshot reviewed before publication.
