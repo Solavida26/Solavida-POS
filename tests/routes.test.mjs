@@ -18,6 +18,7 @@ async function addOrder(n){const id=uid(n),item=uid(n+100);await q("insert into 
 const o1=await addOrder(50),o2=await addOrder(51),o3=await addOrder(52),o4=await addOrder(53);
 const beforeMigration=(await q('select * from orders order by id')).rows;
 await db.exec(await read('supabase/migrations/20261014124432_delivery_routes.sql'));
+await db.exec(await read('integration/dispatcher-progress.sql'));
 await check('Additive migration preserves all existing order rows',async()=>assert.deepEqual((await q('select * from orders order by id')).rows,beforeMigration));
 const plan=(id,orders,who=driver)=>q('select delivery_plan($1,$2,$3,$4,$5)',[id,today,who,[driver,helper,noLogin],JSON.stringify(orders.map(order_id=>({order_id})))]);
 const depart=()=>q('select delivery_depart($1)',[trip]);
@@ -71,4 +72,46 @@ await check('Staff cannot return delivered order to pending',()=>as(driver,()=>r
 await check('Customer recency includes completed deliveries only',()=>as(owner,async()=>{const r=await q('select * from delivery_customer_recency()');assert.equal(r.rows.length,1);assert.ok(r.rows[0].last_delivered_at);}));
 await check('Staff cannot request all customer recency',()=>as(driver,()=>rejects(()=>q('select * from delivery_customer_recency()'),/dispatcher/)));
 await check('Visit creates no order or sale',async()=>{await as(owner,()=>q('select delivery_plan($1,$2,$3,$4,$5)',[uid(43),today,driver,[driver],JSON.stringify([{customer_id:cust}])]));await as(owner,()=>q('select delivery_depart($1)',[uid(43)]));const v=(await scalar('select id from delivery_stops where trip_id=$1',[uid(43)])).id;await as(driver,()=>q("select delivery_stop_action($1,'arrive',null)",[v]));await as(driver,()=>q("select delivery_stop_action($1,'visit_complete','No refill needed')",[v]));await as(driver,()=>q('select delivery_finish($1)',[uid(43)]));assert.equal((await scalar('select count(*)::int n from orders')).n,4);assert.equal((await scalar('select count(*)::int n from payments')).n,2);});
+
+await check('Dispatcher departs an existing planned route',()=>as(dispatcher,()=>q('select delivery_depart($1)',[uid(42)])));
+const ds=(await scalar('select id from delivery_stops where order_id=$1 and released_at is null',[o3])).id;
+await check('Dispatcher still must record arrival before completion',()=>as(dispatcher,()=>rejects(()=>complete(o3),/arrival/)));
+await check('Unassigned staff cannot record arrival',()=>as(outsider,()=>rejects(()=>q("select delivery_stop_action($1,'arrive','Driver reported arrival')",[ds]),/assigned personnel/)));
+await check('Dispatcher proxy arrival requires reporter note',()=>as(dispatcher,()=>rejects(()=>q("select delivery_stop_action($1,'arrive',null)",[ds]),/note/)));
+await check('Dispatcher records arrival without becoming assigned driver',async()=>{
+ await as(dispatcher,()=>q("select delivery_stop_action($1,'arrive','Driver phoned cashier')",[ds]));
+ assert.equal((await scalar('select arrived_by from delivery_stops where id=$1',[ds])).arrived_by,dispatcher);
+ assert.equal((await scalar('select driver_id from delivery_trips where id=$1',[uid(42)])).driver_id,driver);
+ assert.equal((await scalar('select count(*)::int n from delivery_trip_members where trip_id=$1 and employee_id=$2',[uid(42),dispatcher])).n,0);
+});
+await check('Dispatcher completes cash delivery once with audit attribution',async()=>{
+ const before=(await scalar('select count(*)::int n from payments')).n;
+ await as(dispatcher,()=>complete(o3));
+ assert.equal((await scalar('select count(*)::int n from payments')).n,before+1);
+ const s=await scalar('select * from delivery_stops where id=$1',[ds]);assert.equal(s.completed_by,dispatcher);assert.equal(s.status,'completed');
+ assert.equal((await scalar('select delivery_personnel_id from orders where id=$1',[o3])).delivery_personnel_id,driver);
+ assert.equal((await scalar('select count(*)::int n from order_contributors where order_id=$1 and employee_id=$2',[o3,dispatcher])).n,0);
+ await as(dispatcher,()=>rejects(()=>complete(o3),/On the Way/));
+ assert.equal((await scalar('select count(*)::int n from payments')).n,before+1);
+});
+await check('Dispatcher finishes trip',()=>as(dispatcher,()=>q('select delivery_finish($1)',[uid(42)])));
+const oc=await addOrder(54),tc=uid(44);
+await as(dispatcher,()=>plan(tc,[oc]));await as(dispatcher,()=>q('select delivery_depart($1)',[tc]));
+const sc=(await scalar('select id from delivery_stops where order_id=$1',[oc])).id;
+await check('Dispatcher cannot grant dispatcher access to others',()=>as(dispatcher,()=>rejects(()=>q('select delivery_set_dispatcher($1,true)',[outsider]),/Owner/)));
+await as(owner,()=>q('select delivery_set_dispatcher($1,false)',[dispatcher]));
+await check('Revocation immediately blocks unassigned dispatcher progress',async()=>{
+ await as(dispatcher,()=>rejects(()=>q("select delivery_stop_action($1,'arrive','Driver reported')",[sc]),/assigned personnel/));
+ await as(dispatcher,()=>rejects(()=>complete(oc,'credit'),/assigned personnel/));
+});
+await as(owner,()=>q('select delivery_set_dispatcher($1,true)',[dispatcher]));
+await check('Dispatcher credit completion creates one charge and no cash payment',async()=>{
+ const before=(await scalar('select count(*)::int n from payments')).n;
+ await as(dispatcher,()=>q("select delivery_stop_action($1,'arrive','Driver reported')",[sc]));
+ await as(dispatcher,()=>complete(oc,'credit'));
+ assert.equal((await scalar('select count(*)::int n from credit_charges where order_id=$1',[oc])).n,1);
+ assert.equal((await scalar('select count(*)::int n from payments')).n,before);
+});
+await check('Dispatcher cannot rewrite completed history',()=>as(dispatcher,()=>rejects(()=>q("update orders set status='pending' where id=$1",[oc]),/rewritten/)));
+
 console.log(`${passed} route integration checks passed`);await db.close();
