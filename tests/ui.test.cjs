@@ -55,7 +55,7 @@ await page.waitForFunction(()=>window.calls.some(c=>c[0]==='delivery_stop_action
 assert.match(proxyPrompt,/Dispatcher\/Owner/);
 assert.deepEqual(await page.evaluate(()=>window.calls.find(c=>c[0]==='delivery_stop_action')[1]),{p_stop:'s1',p_action:'arrive',p_note:'Driver phoned cashier'});
 await page.locator('[data-order="o1"]').click();assert.equal(await page.evaluate(()=>window.openedForCompletion),'o1');
-await page.locator('[data-finish="t1"]').click();await page.waitForFunction(()=>window.calls.some(c=>c[0]==='delivery_finish'));
+page.once('dialog',d=>d.accept());await page.locator('[data-finish="t1"]').click();await page.waitForFunction(()=>window.calls.some(c=>c[0]==='delivery_finish'));
 console.log('PASS authorized cashier arrival, reporter note, completion navigation and finish controls without owner permission grants');
 
 assert.deepEqual(errors,[]);await browser.close();console.log('PASS desktop selection, multiple personnel, request payload, Owner report, Staff controls, mobile width, no JavaScript errors');})().catch(e=>{console.error(e);process.exit(1)});
