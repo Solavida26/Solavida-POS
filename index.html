@@ -2616,6 +2616,7 @@ $("savePasswordBtn").onclick=async()=>{
     $("completePaymentStatus").dispatchEvent(new Event("change"));$("finishDelivery").onclick=()=>finishDelivery(o);
   }
   async function finishDelivery(o){
+    if(deliverySaving)return;
     const returned=Number($("containersReturned").value||0),received=($("receivedBy").value||"").trim(),ps=$("completePaymentStatus").value;
     if(returned<0){alert("Containers returned cannot be negative.");return}if(!received){alert("Enter who received the delivery.");return}
     const actualItems=[...document.querySelectorAll("#completeDeliveryBox .actual-item-row")].map(row=>({order_item_id:row.dataset.itemId,delivered_qty:Number(row.querySelector(".actual-item-qty").value||0)}));
@@ -2626,8 +2627,14 @@ $("savePasswordBtn").onclick=async()=>{
     const paymentStatus=ps==="paid"?"paid":"credit",method=paymentStatus==="paid"?$("completePaymentMethod").value:null;
     const amountReceived=paymentStatus==="paid"?Number($("completeAmount").value||0):0,ref=paymentStatus==="paid"?($("completeRef").value||null):null;
     if(paymentStatus==="paid"&&amountReceived<amount){alert("Amount received is less than the delivery amount.");return}
+    deliverySaving=true;$("finishDelivery").disabled=true;
+    try{
     const {error}=await db.rpc("complete_delivery_order_multi_v3",{p_order_id:o.id,p_actual_items:actualItems,p_containers_returned:returned,p_received_by:received,p_payment_status:paymentStatus,p_payment_method:method,p_amount_received:amountReceived,p_reference_number:ref,p_notes:null,p_contributors:contributors});
-    if(error){alert(error.message);return}await loadOrders();if(typeof dashboard==="function")await dashboard();renderDetail(allOrders.find(x=>x.id===o.id));
+    if(error){alert(error.message);return}
+    if(routeOrderDialog){routeOrderDialog.close();await window.refreshDeliveryTripDesk?.();}
+    await loadOrders();if(typeof dashboard==="function")await dashboard();renderDetail(allOrders.find(x=>x.id===o.id));
+    }catch(e){alert('Could not refresh delivery details. Check the order status before retrying: '+e.message);}
+    finally{deliverySaving=false;if($("finishDelivery"))$("finishDelivery").disabled=false;}
   }
 
   async function cancelSelected(o){
@@ -2648,7 +2655,43 @@ $("savePasswordBtn").onclick=async()=>{
 
   // Expose for the existing tab switcher without changing the rest of the POS.
   window.loadSolavidaOrders=loadOrders;
-  window.openDeliveryRouteOrder=async function(id){showTab('orders');await loadOrders();const o=allOrders.find(x=>x.id===id);if(!o){alert('Order not found. Refresh Orders.');return;}selectOrder(id);if(o.status==='on_the_way')showCompleteBox(o);};
+
+  let routeOrderDialog=null, deliverySaving=false;
+  async function routeOrder(id){
+    const {data,error}=await db.from("orders").select(`
+      id,order_no,channel,status,payment_status,payment_method,delivery_personnel_id,
+      on_the_way_at,delivered_at,delivery_address,delivery_google_maps_url,area,
+      ordered_amount,actual_amount,amount_collected,actual_qty,containers_returned,received_by,
+      created_at,customer_id,
+      customer:customers(id,full_name,mobile,customer_type),
+      delivery_personnel:employees!orders_delivery_personnel_id_fkey(id,full_name),
+      order_items(id,ordered_qty,delivered_qty,unit_price,line_total,container_type_id,container_type_name,
+        product:products(id,name,unit)),
+      payments(id,amount,payment_method,reference_number,received_at),
+      order_contributors(id,employee_id,contribution_type,employee:employees(id,full_name))
+    `).eq("id",id).eq("channel","delivery").single();
+    if(error)throw error;if(!data)throw Error('Order not found. Refresh the trip.');return data;
+  }
+  window.printDeliveryRouteOrders=async function(ids){
+    // Open synchronously so the cashier's click permits one print window.
+    const w=window.open('','_blank','width=420,height=800');
+    if(!w){alert('Please allow pop-ups for Solavida POS to print receipts.');return;}
+    w.document.body.textContent='Loading delivery receipts…';
+    try{const orders=await Promise.all([...new Set(ids)].map(routeOrder));window.solavidaPrintDeliveryReceipts(orders,w);}
+    catch(e){w.close();alert(e.message);}
+  };
+  window.openDeliveryRouteOrder=async function(id){
+    if(routeOrderDialog)return;
+    const o=await routeOrder(id),panel=$('orderDetailPanel'),parent=panel.parentNode,next=panel.nextSibling;
+    const d=document.createElement('dialog');d.className='dr-order-dialog';
+    d.style.cssText='width:min(900px,95vw);max-height:90vh;overflow:auto;border:1px solid #d4e4ed;border-radius:14px;padding:20px';
+    const close=document.createElement('button');close.textContent='Back to trip';close.className='action-primary';
+    close.onclick=()=>{if(!deliverySaving)d.close();};d.append(close,panel);document.body.append(d);routeOrderDialog=d;
+    d.addEventListener('cancel',e=>{if(deliverySaving)e.preventDefault();});
+    d.addEventListener('close',()=>{parent.insertBefore(panel,next);d.remove();routeOrderDialog=null;});
+    renderDetail(o);d.showModal();if(o.status==='on_the_way')showCompleteBox(o);
+  };
+
   window.renderSolavidaOrders=renderOrders;
 })();
 </script>
@@ -3186,8 +3229,8 @@ function r89EodExport(){const rows=r89EodRows();if(rows)r89Csv('Solavida_EOD_'+e
 function r89EodPrint(){const rows=r89EodRows();if(!rows)return;const win=window.open('','_blank');if(!win){alert('Allow pop-ups to print the EOD report.');return;}const safe=v=>eodEsc(v);win.document.write('<!doctype html><html><head><title>Solavida EOD '+safe(eodSummary.date)+'</title><style>body{font:12px Arial;padding:20px;color:#15374b}h1{font-size:20px}table{width:100%;border-collapse:collapse}td{border:1px solid #cddfe6;padding:6px;word-break:break-word}tr:has(td:only-child){background:#e7f4f0;font-weight:bold} @page{size:landscape;margin:12mm}</style></head><body><h1>Solavida — End of Day · '+safe(eodSummary.date)+'</h1><table>'+rows.map(r=>'<tr>'+r.map(c=>'<td>'+safe(c)+'</td>').join('')+'</tr>').join('')+'</table></body></html>');win.document.close();win.focus();setTimeout(()=>win.print(),350);}
 (function initV85(){const el=document.getElementById('r85Tabs');if(!el)return;el.innerHTML=r85Names.map((n,i)=>`<button onclick="r85SelectTab(${i})" class="${i===0?'active':''}">${esc(n)}</button>`).join('');r85SetPreset('month');const nav=document.querySelector('[data-tab="reports"]');if(nav)nav.style.display='none';const observer=new MutationObserver(()=>{if(nav)nav.style.display=typeof currentEmployeeRole!=='undefined'&&currentEmployeeRole==='owner'?'':'none'});observer.observe(document.getElementById('app'),{attributes:true,attributeFilter:['class']});})();
 </script>
-<script src="delivery-routes.js"></script>
-<script src="delivery-receipt.js?v=47e0387"></script>
+<script src="delivery-routes.js?v=trip-desk-1"></script>
+<script src="delivery-receipt.js?v=trip-desk-1"></script>
 <script src="sales-summary.js?v=20261112-1"></script>
 <script src="eod-layout.js?v=20261112-1"></script>
 </body>

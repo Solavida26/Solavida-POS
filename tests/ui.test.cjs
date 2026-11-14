@@ -18,9 +18,10 @@ await page.locator('#drPersonnel summary').click();await page.locator('[data-mem
 await page.waitForFunction(()=>window.calls.some(c=>c[0]==='delivery_plan'));const args=await page.evaluate(()=>window.calls.find(c=>c[0]==='delivery_plan')[1]);assert.equal(args.p_stops.length,2);assert.deepEqual(args.p_members,['e2','e3']);assert.equal(args.p_driver,'e2');
 assert.equal(await page.evaluate(()=>window.calls.some(c=>c[0]==='delivery_save_location')),false);
 await page.evaluate(()=>{window.fixture.delivery_trips=[{id:'t1',trip_no:1,status:'planned',driver_id:'e2'}];window.fixture.delivery_stops=[{id:'s1',trip_id:'t1',customer_id:'c1',order_id:'o1',position:1,status:'pending'}];showTab('map');});
-await page.locator('[data-road-trip="t1"]').click();await page.locator('.dr-directions-dialog').waitFor();assert.match(await page.locator('.dr-directions-dialog').innerText(),/Maria Santos/);await page.locator('[data-close-directions]').click();await page.getByRole('link',{name:'Open navigation ↗'}).waitFor();let nav=new URL(await page.getByRole('link',{name:'Open navigation ↗'}).getAttribute('href'));assert.equal(nav.searchParams.get('origin'),'9.3244018,123.2988483');assert.equal(nav.searchParams.get('destination'),'9.33,123.3');
+await page.locator('[data-trip-open="t1"]').click();await page.locator('[data-road-trip="t1"]').click();await page.locator('.dr-directions-dialog').waitFor();assert.match(await page.locator('.dr-directions-dialog').innerText(),/Maria Santos/);await page.locator('[data-close-directions]').click();await page.getByRole('link',{name:'Open navigation ↗'}).waitFor();let nav=new URL(await page.getByRole('link',{name:'Open navigation ↗'}).getAttribute('href'));assert.equal(nav.searchParams.get('origin'),'9.3244018,123.2988483');assert.equal(nav.searchParams.get('destination'),'9.33,123.3');
 await page.evaluate(()=>{window.fixture.customers[0].google_maps_url='https://www.google.com/maps/search/?api=1&query=9.34%2C123.31';showTab('map');});
 await page.waitForFunction(()=>document.querySelector('a[href*=destination]')?.href.includes('9.34'));nav=new URL(await page.getByRole('link',{name:'Open navigation ↗'}).getAttribute('href'));assert.equal(nav.searchParams.get('destination'),'9.34,123.31');
+await page.locator('[data-trip-close]').click();
 await page.evaluate(()=>{r85Tab=5;document.getElementById('reports').classList.remove('hidden');r85Render();});await page.getByRole('heading',{name:'Delivery Route Report',exact:true}).waitFor();assert.ok(await page.getByRole('button',{name:'Export for Excel'}).count());
 await page.evaluate(()=>{fixture.delivery_trips=[{id:'t1',trip_no:1,business_date:'2026-11-11',status:'completed',driver_id:'e2',started_at:'2026-11-11T01:00:00Z',finished_at:'2026-11-11T02:02:03Z'},{id:'t2',trip_no:1,business_date:'2026-11-12',status:'planned',driver_id:'e3'}];fixture.delivery_stops=[{id:'s1',trip_id:'t1',customer_id:'c1',order_id:'o1',position:1,status:'completed',completed_at:'2026-11-11T01:45:00Z',snapshot:{actual_qty:6,containers_returned:6}},{id:'s2',trip_id:'t2',customer_id:'c2',order_id:'o2',position:1,status:'pending'}];fixture.customers[0].area='North';fixture.customers[1].area='South';fixture.orders[0].area='North';fixture.orders[1].area='South';r85Render();});
 await page.locator('[data-report-view="t2"]').waitFor();
@@ -37,11 +38,12 @@ await page.locator('#drReportDriver').fill('');
 await page.evaluate(()=>{fixture.delivery_trips=[{id:'t1',trip_no:1,status:'planned',driver_id:'e2'}];fixture.delivery_stops=[{id:'s1',trip_id:'t1',customer_id:'c1',order_id:'o1',position:1,status:'pending'}];});
 console.log('PASS compact route report, driver/area filters, same-number different-date View, read-only details');
 await page.evaluate(()=>{window.currentEmployeeRole='staff';window.currentEmployeeId='e2';showTab('map');});await page.getByRole('heading',{name:'My assigned trips'}).waitFor();assert.equal(await page.locator('[data-do="save"]').count(),0);assert.equal(await page.locator('#drDispatcher').count(),0);
-await page.evaluate(()=>{for(let i=3;i<=11;i++){window.fixture.customers.push({id:'c'+i,full_name:'Stop '+i,google_maps_url:(9.3+i/1000)+',123.3'});window.fixture.delivery_stops.push({id:'s'+i,trip_id:'t1',customer_id:'c'+i,position:i,status:'pending'});}showTab('map');});await page.locator('[data-road-trip="t1"]').click();const links=await page.locator('.dr-directions-dialog a').evaluateAll(a=>a.map(x=>({text:x.textContent,url:x.href})));const parts=links.filter(x=>x.text.startsWith('Part '));assert.equal(parts.length,3);const urls=parts.map(x=>new URL(x.url));assert.equal(urls[1].searchParams.get('origin'),urls[0].searchParams.get('destination'));assert.equal(urls[2].searchParams.get('origin'),urls[1].searchParams.get('destination'));assert.equal(urls.reduce((n,u)=>n+1+(u.searchParams.get('waypoints')?.split('|').length||0),0),10);await page.locator('[data-close-directions]').click();
+await page.evaluate(()=>{for(let i=3;i<=11;i++){window.fixture.customers.push({id:'c'+i,full_name:'Stop '+i,google_maps_url:(9.3+i/1000)+',123.3'});window.fixture.delivery_stops.push({id:'s'+i,trip_id:'t1',customer_id:'c'+i,position:i,status:'pending'});}showTab('map');});await page.locator('[data-trip-open="t1"]').click();await page.locator('[data-road-trip="t1"]').click();const links=await page.locator('.dr-directions-dialog a').evaluateAll(a=>a.map(x=>({text:x.textContent,url:x.href})));const parts=links.filter(x=>x.text.startsWith('Part '));assert.equal(parts.length,3);const urls=parts.map(x=>new URL(x.url));assert.equal(urls[1].searchParams.get('origin'),urls[0].searchParams.get('destination'));assert.equal(urls[2].searchParams.get('origin'),urls[1].searchParams.get('destination'));assert.equal(urls.reduce((n,u)=>n+1+(u.searchParams.get('waypoints')?.split('|').length||0),0),10);await page.locator('[data-close-directions]').click();
 await page.setViewportSize({width:390,height:844});
 assert.equal(await page.evaluate(()=>document.getElementById('map').scrollWidth<=document.getElementById('map').clientWidth),true);
 await page.screenshot({path:'/tmp/solavida-route-mobile.png',fullPage:true});
 
+await page.locator('[data-trip-close]').click();
 await page.evaluate(()=>{
  window.testDispatcher=true;window.currentEmployeeRole='staff';window.currentEmployeeId='e1';
  window.fixture.delivery_trips=[{id:'t1',trip_no:1,status:'on_the_way',driver_id:'e2'}];
@@ -49,15 +51,15 @@ await page.evaluate(()=>{
  window.fixture.delivery_trip_members=[{trip_id:'t1',employee_id:'e2'}];
  window.openDeliveryRouteOrder=async id=>{window.openedForCompletion=id;};showTab('map');
 });
-await page.locator('[data-arrive="s1"]').waitFor();
+await page.locator('[data-trip-open="t1"]').click();await page.locator('[data-arrive="s1"]').waitFor();
 assert.equal(await page.locator('#drDispatcher').count(),0);
 let proxyPrompt='';page.once('dialog',async d=>{proxyPrompt=d.message();await d.accept('Driver phoned cashier');});
 await page.locator('[data-arrive="s1"]').click();
 await page.waitForFunction(()=>window.calls.some(c=>c[0]==='delivery_stop_action'));
 assert.match(proxyPrompt,/Dispatcher\/Owner/);
 assert.deepEqual(await page.evaluate(()=>window.calls.find(c=>c[0]==='delivery_stop_action')[1]),{p_stop:'s1',p_action:'arrive',p_note:'Driver phoned cashier'});
-await page.locator('[data-order="o1"]').click();assert.equal(await page.evaluate(()=>window.openedForCompletion),'o1');
-page.once('dialog',d=>d.accept());await page.locator('[data-finish="t1"]').click();await page.waitForFunction(()=>window.calls.some(c=>c[0]==='delivery_finish'));
+assert.equal(await page.evaluate(()=>window.openedForCompletion),'o1');
+await page.evaluate(()=>{fixture.delivery_stops[0].status='completed';return refreshDeliveryTripDesk();});page.once('dialog',d=>d.accept());await page.locator('[data-finish="t1"]').click();await page.waitForFunction(()=>window.calls.some(c=>c[0]==='delivery_finish'));
 console.log('PASS authorized cashier arrival, reporter note, completion navigation and finish controls without owner permission grants');
 
 assert.deepEqual(errors,[]);await browser.close();console.log('PASS desktop selection, multiple personnel, request payload, Owner report, Staff controls, mobile width, no JavaScript errors');})().catch(e=>{console.error(e);process.exit(1)});

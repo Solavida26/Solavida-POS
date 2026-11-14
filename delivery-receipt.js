@@ -3,7 +3,7 @@
 function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function money(n){return "₱"+Number(n||0).toLocaleString("en-PH",{minimumFractionDigits:2,maximumFractionDigits:2});}
 function date(v){if(!v)return "—";const d=new Date(v);return Number.isNaN(d.getTime())?"—":d.toLocaleString("en-PH",{dateStyle:"medium",timeStyle:"short"});}
-window.solavidaPrintDeliveryReceipt=function(o){
+function receiptHtml(o){
  if(!o||!o.id){alert("Select a delivery order to print.");return;}
  const delivered=o.status==="delivered",items=o.order_items||[];
  const team=(o.order_contributors||[]).filter(c=>c.contribution_type==="delivery").map(c=>c.employee?.full_name).filter(Boolean);
@@ -12,8 +12,18 @@ window.solavidaPrintDeliveryReceipt=function(o){
  const computed=items.reduce((s,i)=>s+Number(delivered?i.delivered_qty:i.ordered_qty||0)*Number(i.unit_price||0),0);
  const total=Number(delivered?(o.actual_amount??computed):(o.ordered_amount??computed));
  const html='<!doctype html><html><head><meta charset="utf-8"><title>Delivery Receipt - '+esc(o.order_no||"Order")+'</title><style>@page{size:auto;margin:0}*{box-sizing:border-box}html,body{margin:0;padding:0;background:#fff;color:#000;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:400;line-height:1.3;-webkit-font-smoothing:auto}.paper{width:48mm;max-width:100%;margin:0 auto;padding:2mm 1mm;overflow-wrap:anywhere}strong{font-weight:700}.center{text-align:center}.brand{margin-bottom:7px}.rule{border-top:1px dashed #000;margin:5px 0}.r{margin:2px 0}.item{margin:6px 0 4px}.item-line,.total{display:flex;justify-content:space-between;gap:4px}.item-line>*{min-width:0}.total strong{white-space:nowrap}.actual{margin:10px 0}.blank{display:inline-block;width:17mm;border-bottom:1px solid #000;height:12px}.sign{margin-top:5px;border-bottom:1px solid #000;height:25px}.footer{margin-top:10px;text-align:center}.no-print{margin:8px 0;text-align:center}@media print{.no-print{display:none!important}html,body{width:48mm;max-width:100%}.paper{margin:0}}@media screen{body{padding:12px;background:#eee}.paper{background:white;box-shadow:0 2px 8px #bbb}}</style></head><body><div class="paper"><div class="center brand">Solavida<br>Water Refilling Station<br>Delivery Receipt</div><div class="r">Customer Name: <strong>'+esc(o.customer?.full_name||"Walk-In")+'</strong></div><div class="r">Address: '+esc(o.delivery_address||o.area||"—")+'</div><div class="r">Order Date: '+date(o.created_at)+'</div><div class="r">Order #: '+esc(o.order_no||"—")+'</div><div class="r">Delivered by: '+esc(team.join(", ")||"—")+'</div><div class="rule"></div><div>Order Items</div>'+lines+'<div class="rule"></div><div class="total"><strong>TOTAL</strong><strong>'+money(total)+'</strong></div><div class="rule"></div><div>Received:</div><div class="actual">Actual Qty: <span class="blank"></span></div><div class="actual">Actual Amt: <span class="blank"></span></div><div class="actual">Returned Containers: <span class="blank"></span></div><div>Received in good condition by:</div><div class="sign"></div><div class="center">Signature over Printed Name</div><div class="footer">Thank you!<br>Delivery acknowledgement only.</div><div class="no-print"><button onclick="window.print()">Print Receipt</button></div></div></body></html>';
- const w=window.open("","_blank","width=420,height=800");
- if(!w){alert("Please allow pop-ups for Solavida POS to print the delivery receipt.");return;}
- w.document.open();w.document.write(html);w.document.close();w.focus();setTimeout(()=>{try{w.print();}catch(e){console.error(e)}},350);
+ return html;
+}
+window.solavidaPrintDeliveryReceipts=function(orders,providedWindow){
+ if(!orders?.length){providedWindow?.close();alert('No delivery orders to print.');return;}
+ const docs=orders.map(receiptHtml);if(docs.some(x=>!x)){providedWindow?.close();return;}
+ const first=new DOMParser().parseFromString(docs[0],'text/html');
+ first.title=orders.length===1?'Delivery Receipt - '+orders[0].order_no:'Solavida Trip Receipts';
+ first.body.innerHTML=docs.map(html=>new DOMParser().parseFromString(html,'text/html').body.innerHTML).join('');
+ const style=first.createElement('style');style.textContent='.paper{break-after:page}.paper:last-child{break-after:auto}';first.head.append(style);
+ const w=providedWindow||window.open('','_blank','width=420,height=800');
+ if(!w){alert('Please allow pop-ups for Solavida POS to print the delivery receipt.');return;}
+ w.document.open();w.document.write('<!doctype html>'+first.documentElement.outerHTML);w.document.close();w.focus();setTimeout(()=>{try{w.print();}catch(e){console.error(e)}},350);
 };
+window.solavidaPrintDeliveryReceipt=o=>window.solavidaPrintDeliveryReceipts([o]);
 })();

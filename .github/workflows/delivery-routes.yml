@@ -22,4 +22,5 @@ jobs:
       - run: node --check delivery-routes.js
       - run: npx playwright install --with-deps chromium
       - run: npm run test:ui
+      - run: node tests/trip-desk-ui.test.cjs
       - run: node tests/sales-summary-ui.test.cjs
