@@ -816,11 +816,33 @@
   r.onclick=click;r.onchange=change;const personnel=$('drPersonnel');if(personnel)personnel.onkeydown=e=>{if(e.key==='Escape'){personnel.open=false;personnel.querySelector('summary').focus();}};
   if(S.dispatch){drawSelected();nearby();}map();
  }
- function tripCard(t){const stops=S.stops.filter(s=>s.trip_id===t.id).sort((a,b)=>a.position-b.position),team=S.members.filter(m=>m.trip_id===t.id).map(m=>emp(m.employee_id)).join(', ');
-  return `<details class="dr-stop" ${t.status!=='completed'?'open':''}><summary>Trip ${tripNo(t)} · ${esc(t.status.replaceAll('_',' '))} · ${stops.filter(s=>s.status==='completed').length}/${stops.length} stops</summary><button data-view-map="${t.id}">Show stops on map</button><button data-road-trip="${t.id}">Road directions ↗</button><p><strong>Driver:</strong> ${esc(emp(t.driver_id))} · <strong>Personnel:</strong> ${esc(team)}</p><p class="dr-muted">Departure: ${time(t.started_at)} · Finished: ${time(t.finished_at)} · Duration: ${duration(t.started_at,t.finished_at)}</p>${stops.map(s=>{
-   const c=customer(s.customer_id),o=order(s.order_id),l=loc(c.id),nav=l?`https://www.google.com/maps/dir/?api=1${s.position===1?'&origin='+encodeURIComponent(STATION.latitude+','+STATION.longitude):''}&destination=${encodeURIComponent(l.latitude+','+l.longitude)}`:null;
-   return `<div class="dr-stop"><span class="dr-pill">${s.position}${t.planned_stops?' (planned '+((t.planned_stops||[]).find(x=>x.id===s.id)?.position??s.position)+')':''} · ${esc(s.status)}</span><h3>${esc(c.full_name)}</h3><p>${esc(c.address||c.area||'Address not saved')} ${o?'· Order '+esc(short(o.order_no)):'· Customer visit'}</p>${o?`<p>Scheduled: ${num(qty(o))} containers · ${esc(o.payment_status)}<br>${esc(o.notes||'')}</p>`:''}<p class="dr-muted">Arrived: ${time(s.arrived_at)} ${s.arrived_by?'by '+esc(emp(s.arrived_by)):''}<br>Completed: ${time(s.completed_at)} ${s.completed_by?'by '+esc(emp(s.completed_by)):''}</p>${s.snapshot?`<p>Delivered: ${num(s.snapshot.actual_qty)} · Returned: ${num(s.snapshot.containers_returned)}</p>`:''}${s.outcome?`<p>${esc(s.outcome)}</p>`:''}<div class="dr-actions">${nav?`<a class="dr-pill" href="${nav}" target="_blank" rel="noopener noreferrer">Open navigation ↗</a>`:'<span class="dr-muted">No verified map location</span>'}${t.status==='on_the_way'&&!['completed','skipped'].includes(s.status)?`${!s.arrived_at?`<button class="primary" data-arrive="${s.id}">Arrived</button>`:''}${s.order_id?`<button data-order="${s.order_id}">Open order / Complete delivery</button>`:`<button data-visit="${s.id}">Finish visit</button>`}`:''}${S.dispatch&&!['completed','cancelled'].includes(t.status)?`<button data-up="${s.id}" title="Move stop earlier">↑ Move earlier</button>`:''}</div></div>`;
-  }).join('')}<div class="dr-actions">${S.dispatch&&t.status==='planned'?`<button class="primary" data-depart="${t.id}">Mark on the way</button><button data-cancel-plan="${t.id}">Cancel plan</button>`:''}${t.status==='on_the_way'?`<button class="primary" data-finish="${t.id}">Finish trip</button>`:''}</div></details>`;
+ function tripCard(t){
+  const stops=S.stops.filter(s=>s.trip_id===t.id).sort((a,b)=>a.position-b.position);
+  const team=S.members.filter(m=>m.trip_id===t.id).map(m=>emp(m.employee_id)).join(', ');
+  const rows=stops.map(s=>{
+   const c=customer(s.customer_id),o=order(s.order_id),l=loc(c.id);
+   const nav=l?`https://www.google.com/maps/dir/?api=1${s.position===1?'&origin='+encodeURIComponent(STATION.latitude+','+STATION.longitude):''}&destination=${encodeURIComponent(l.latitude+','+l.longitude)}`:null;
+   const done=['completed','skipped'].includes(s.status);
+   const statusLabel=s.status==='completed'?'Completed':s.status==='skipped'?'Skipped':s.arrived_at?'Arrived':t.status==='planned'?'Pending':'On the way';
+   const action=t.status==='on_the_way'&&!done
+    ?(!s.arrived_at?`<button class="primary" data-arrive="${s.id}">Arrived</button>`:s.order_id?`<button class="primary" data-order="${s.order_id}">Complete delivery</button>`:`<button class="primary" data-visit="${s.id}">Finish visit</button>`)
+    :s.status==='completed'?'<span class="dr-muted">Done</span>':'<span class="dr-muted">—</span>';
+   return `<tr>
+    <td class="dr-trip-number">${s.position}</td>
+    <td><strong>${esc(c.full_name)}</strong><div class="dr-muted">${esc(c.address||c.area||'Address not saved')}</div>${o?`<div class="dr-muted">Order ${esc(short(o.order_no))} · ${num(qty(o))} scheduled · ${esc(o.payment_status)}</div>`:''}${o?.notes?`<div class="dr-muted">${esc(o.notes)}</div>`:''}</td>
+    <td>${o&&s.snapshot?`${num(s.snapshot.actual_qty)} delivered<br>${num(s.snapshot.containers_returned)} returned`:o?'—':'Customer visit'}</td>
+    <td><span class="dr-status dr-status-${esc(s.status)}">${esc(statusLabel)}</span><div class="dr-muted">Arrived: ${time(s.arrived_at)}<br>Completed: ${time(s.completed_at)}</div></td>
+    <td class="dr-trip-action">${action}</td>
+    <td><div class="dr-trip-tools">${nav?`<a class="dr-pill" href="${esc(nav)}" target="_blank" rel="noopener noreferrer">Navigate ↗</a>`:'<span class="dr-muted">No pin</span>'}${S.dispatch&&!['completed','cancelled'].includes(t.status)?`<button data-up="${s.id}" title="Move stop earlier">↑</button>`:''}</div></td>
+   </tr>`;
+  }).join('');
+  return `<details class="dr-stop dr-trip" ${t.status!=='completed'?'open':''}>
+   <summary>Trip ${tripNo(t)} · ${esc(t.status.replaceAll('_',' '))} · ${stops.filter(s=>s.status==='completed').length}/${stops.length} stops</summary>
+   <div class="dr-trip-meta"><span><strong>Driver:</strong> ${esc(emp(t.driver_id))}</span><span><strong>Personnel:</strong> ${esc(team)}</span><span><strong>Departure:</strong> ${time(t.started_at)}</span><span><strong>Finished:</strong> ${time(t.finished_at)}</span><span><strong>Duration:</strong> ${duration(t.started_at,t.finished_at)}</span></div>
+   <div class="dr-actions"><button data-view-map="${t.id}">Show stops on map</button><button data-road-trip="${t.id}">Road directions ↗</button></div>
+   <div class="dr-scroll"><table class="dr-trip-table"><thead><tr><th>#</th><th>Customer / Order</th><th>Delivered / Returned</th><th>Status / Time</th><th>Next step</th><th>Tools</th></tr></thead><tbody>${rows}</tbody></table></div>
+   <div class="dr-actions">${S.dispatch&&t.status==='planned'?`<button class="primary" data-depart="${t.id}">Mark on the way</button><button data-cancel-plan="${t.id}">Cancel plan</button>`:''}${t.status==='on_the_way'?`<button class="primary" data-finish="${t.id}">Finish trip</button>`:''}</div>
+  </details>`;
  }
  function roadDirections(stops){
   if(!stops.length){alert('Select at least one customer first.');return;}
@@ -854,7 +876,7 @@
     if(!S.selected.length||!S.driver||!S.team.includes(S.driver))throw Error('Select customers, check personnel and choose the driver.');
     await rpc('delivery_plan',{p_id:S.request,p_date:S.date,p_driver:S.driver,p_members:S.team,p_stops:S.selected});S.viewTrip=S.request;S.selected=[];S.request=crypto.randomUUID();
    }else if(b.dataset.depart){if(!confirm('Start this trip now? Its orders will be marked On the way.'))return;await rpc('delivery_depart',{p_trip:b.dataset.depart});}
-   else if(b.dataset.arrive){const s=S.stops.find(x=>x.id===b.dataset.arrive);const own=S.members.some(m=>m.trip_id===s.trip_id&&m.employee_id===window.currentEmployeeId);const note=own?null:prompt('Dispatcher/Owner entry: who reported the arrival? This records your account and the current time.');if(!own&&!note)return;await rpc('delivery_stop_action',{p_stop:s.id,p_action:'arrive',p_note:note});}
+   else if(b.dataset.arrive){const s=S.stops.find(x=>x.id===b.dataset.arrive);const own=S.members.some(m=>m.trip_id===s.trip_id&&m.employee_id===window.currentEmployeeId);const note=own?null:prompt('Dispatcher/Owner entry: who reported the arrival? This records your account and the current time.');if(!own&&!note)return;await rpc('delivery_stop_action',{p_stop:s.id,p_action:'arrive',p_note:note});await refresh();render();if(s.order_id&&typeof window.openDeliveryRouteOrder==='function')window.openDeliveryRouteOrder(s.order_id);return;}
    else if(b.dataset.visit){const note=prompt('Visit outcome (no automatic sale or container ledger entry):');if(!note)return;await rpc('delivery_stop_action',{p_stop:b.dataset.visit,p_action:'visit_complete',p_note:note});}
    else if(b.dataset.finish){if(!confirm('Finish this trip now?'))return;await rpc('delivery_finish',{p_trip:b.dataset.finish});}
    else if(b.dataset.up){const s=S.stops.find(x=>x.id===b.dataset.up),stops=S.stops.filter(x=>x.trip_id===s.trip_id).sort((a,b)=>a.position-b.position),i=stops.findIndex(x=>x.id===s.id);if(i===0)return;const reason=prompt('Reason for changing the stop order:');if(!reason)return;[stops[i-1],stops[i]]=[stops[i],stops[i-1]];await rpc('delivery_reorder',{p_trip:s.trip_id,p_ids:stops.map(x=>x.id),p_reason:reason});}
