@@ -1,5 +1,7 @@
 name: Delivery route checks
 on:
+  push:
+    branches: ['work/route-report-*']
   pull_request:
   workflow_dispatch:
 permissions:
