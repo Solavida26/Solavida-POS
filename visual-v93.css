@@ -18,40 +18,46 @@ th{font-weight:600}
 .muted,small,.price-note,.weekly-note,.kpi-card small{font-size:12px}
 .kpi-card span,.metric span,.type-grid span,.container-highlight span{font-size:13px;font-weight:500}
 .kpi-card strong,.value,.metric strong,.type-grid strong,.container-highlight strong{font-size:24px;font-weight:800}
-.top{
- height:72px!important;min-height:72px!important;padding:0 24px!important;
- display:flex!important;align-items:center!important;gap:20px;
- background:#12a9ed!important;filter:none!important;overflow:visible!important;
+/* Approved sidebar shell: navigation scrolls independently; account stays visible. */
+#app{--sidebar-width:216px}
+#app #mainTabs{
+ top:0!important;bottom:0!important;left:0!important;width:var(--sidebar-width)!important;
+ height:100vh;height:100dvh;display:flex;flex-direction:column;gap:12px;
+ padding:22px 12px 16px;overflow:hidden;box-sizing:border-box;
 }
-.top > .brand-anchor:first-child{
- position:static!important;inset:auto!important;width:auto!important;height:auto!important;
- display:flex!important;align-items:center;gap:10px;flex:0 0 auto;
- background:none!important;filter:none!important;padding:0!important;
- color:#fff;font-size:24px;font-weight:700;letter-spacing:-.5px;line-height:1.2;
+#app #mainTabs.hidden{display:none!important}
+#mainTabs>.brand-anchor{
+ position:static!important;inset:auto!important;display:flex!important;align-items:center;gap:10px;
+ width:auto!important;height:auto!important;min-height:42px;flex:none;margin:0 8px 8px;
+ padding:0!important;background:none!important;filter:none!important;color:#fff;
+ font-size:24px;font-weight:700;letter-spacing:-.5px;line-height:1.2;
 }
-.brand-anchor svg{width:28px;height:36px;flex:none}
-.top #employee{
- position:static!important;inset:auto!important;min-width:0!important;width:auto;
- margin-left:auto;padding:0!important;background:none!important;border:0!important;
- box-shadow:none!important;text-shadow:none!important;color:#fff!important;
- font-size:13px!important;font-weight:600;text-align:right!important;line-height:1.4;
- overflow-wrap:anywhere;
-}
-.top #employee:before{content:'SIGNED IN AS';font-size:10px!important;font-weight:500;letter-spacing:.06em;margin-bottom:2px!important;text-shadow:none!important;color:#fff!important}
-.top #logout{position:static!important;inset:auto!important;flex:none;padding:10px 14px!important;margin:0!important;font-size:14px!important;line-height:1.2}
-.tabs{top:72px!important}
-main{padding-top:96px!important}
+#mainTabs .brand-anchor svg{width:28px;height:36px;flex:none}
+#mainTabs .tabs-inner{flex:1 1 auto;min-height:0;width:100%;margin:0;overflow-y:auto;overflow-x:hidden;align-items:stretch;justify-content:flex-start;scrollbar-width:thin}
+#mainTabs .tab{flex:none;min-height:44px}
+#mainTabs .sidebar-account{flex:none;margin-top:auto;padding:14px 4px 0;border-top:1px solid #ffffff40}
+#mainTabs #employee{position:static!important;inset:auto!important;width:auto;min-width:0!important;padding:0 4px 12px!important;margin:0;background:none!important;border:0!important;box-shadow:none!important;color:#fff!important;text-align:left!important;font-size:13px!important;font-weight:500;line-height:1.5;overflow-wrap:anywhere}
+#mainTabs #employee::before{content:'SIGNED IN AS';display:block;font-size:9px;font-weight:500;letter-spacing:.08em;color:#bbd9ed;margin-bottom:3px}
+#mainTabs #logout{position:static!important;inset:auto!important;display:block!important;visibility:visible!important;width:100%;min-height:44px;margin:0!important;padding:10px 8px!important;border:1px solid #cce2f0;border-radius:9px;background:#f5fbff;color:#073b66;font-size:14px!important;font-weight:600;cursor:pointer;line-height:1.3;white-space:normal}
+#mainTabs #logout:hover{background:#ddecf8}
+#mainTabs #logout:focus-visible{outline:3px solid #72d3ff;outline-offset:2px}
+#app>main{margin-left:var(--sidebar-width)!important;width:calc(100% - var(--sidebar-width))!important;padding:22px 24px 36px!important;min-height:100vh;box-sizing:border-box}
 @media(max-width:850px){
- .top{padding:0 14px!important;gap:12px}
- main{padding-top:92px!important}
+ #app{--sidebar-width:88px}
+ #app #mainTabs{padding:14px 6px 10px;gap:10px}
+ #mainTabs>.brand-anchor{justify-content:center;margin:0 0 4px}
+ #mainTabs>.brand-anchor>span{display:none}
+ #mainTabs .tab{justify-content:center;padding:10px 6px}
+ #mainTabs .tab span:last-child{display:none}
+ #mainTabs .sidebar-account{padding:10px 0 0}
+ #mainTabs #employee{font-size:10px!important;padding:0 2px 8px!important;text-align:center!important;line-height:1.35}
+ #mainTabs #employee::before{font-size:8px;letter-spacing:0}
+ #mainTabs #logout{font-size:12px!important;padding:9px 3px!important}
+ #app>main{padding:16px 12px 28px!important}
 }
-@media(max-width:540px){
- .top{padding:10px 12px!important;gap:4px 10px;display:grid!important;grid-template-columns:minmax(0,1fr) auto;height:auto!important;min-height:96px!important}
- .top > .brand-anchor:first-child{grid-column:1;grid-row:1 / 3;font-size:24px;gap:6px}
- .brand-anchor svg{width:23px;height:30px}
- .top #employee{grid-column:2;grid-row:1;font-size:11px!important;max-width:150px}
- .top #employee:before{font-size:8px!important}
- .top #logout{grid-column:2;grid-row:2;justify-self:end;padding:7px 11px!important;font-size:12px!important}
- .tabs{top:96px!important}
- main{padding-top:116px!important}
+@media(max-height:520px){
+ #app #mainTabs{padding-top:8px;padding-bottom:8px;gap:6px}
+ #mainTabs>.brand-anchor{min-height:32px;margin-bottom:0}
+ #mainTabs .sidebar-account{padding-top:7px}
+ #mainTabs #employee{padding-bottom:6px!important}
 }
